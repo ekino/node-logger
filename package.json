@@ -1,0 +1,51 @@
+{
+  "name": "@ekino/logger",
+  "description": "A Lightweight logger that combines debug namespacing capabilities with winston levels and multioutput",
+  "homepage": "https://github.com/ekino/node-logger",
+  "tags": [
+    "logger",
+    "lightweight",
+    "namespaces"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ekino/node-logger.git"
+  },
+  "maintainers": [
+    {
+      "name": "Raphaël Benitte"
+    },
+    {
+      "name": "Nadim El-Boustani"
+    }
+  ],
+  "license": "MIT",
+  "version": "0.0.0",
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "dependencies": {
+    "lodash": "4.x.x",
+    "prettyoutput": "1.x.x",
+    "uuid": "3.x.x"
+  },
+  "devDependencies": {
+    "ava": "0.19.1",
+    "coveralls": "^2.13.1",
+    "eslint": "3.14.0",
+    "git-changelog": "1.1.2",
+    "nyc": "10.1.2",
+    "prettier": "1.3.1",
+    "sinon": "1.17.7"
+  },
+  "scripts": {
+    "fmt": "prettier --print-width 140 --tab-width=4 --single-quote --bracket-spacing --no-semi --color --write index.js",
+    "check-fmt": "prettier --print-width 140 --tab-width=4 --single-quote --bracket-spacing --no-semi --list-different index.js",
+    "test": "ava",
+    "test-cover": "nyc ava",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "changelog": "git-changelog -t false -n v${npm_package_version}",
+    "version": "echo ${npm_package_version}",
+    "lint": "eslint ."
+  }
+}
