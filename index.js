@@ -171,7 +171,7 @@ internals.write = function(output) {
     let result = ''
     if (internals.output === 'pretty') {
         const prefix = `${output.message}\n`
-        result = `${prefix}${prettyOutput(output, null, 2)}`
+        result = `${prefix}${prettyOutput(output, { maxDepth: 6 }, 2)}`
     } else if (internals.output === 'json') {
         const backup = Error.prototype.toJSON
         Error.prototype.toJSON = internals.errorToJson
