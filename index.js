@@ -157,7 +157,7 @@ internals.log = function(namespace, level, contextId, message, data) {
 
     contextId = contextId || module.exports.id()
     const time = new Date().toISOString()
-    const output = Object.assign(internals.globalContext, { level, time, namespace, contextId })
+    const output = Object.assign({}, internals.globalContext, { level, time, namespace, contextId })
     if (message) output.message = message
     if (data) output.data = data
     internals.write(output)
