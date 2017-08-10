@@ -30,7 +30,8 @@ yarn add @ekino/logger
 
 ## Usage
 
-By default, the logger doesn't output anything. You need to define a log `level` and enabled `namespaces`
+By default, the logger output warn and error levels for all namespaces.
+You have the ability to set another global log `level` and/or add overrides per `namespace.
 
 A log instance is bounded to a namespace. To use it, instantiate a logger with a namespace and call a log function.
 
@@ -38,6 +39,7 @@ There are 5 available log levels by a priority. When you set a log level, all le
 Log level can be set by calling `setLevel` function. 
 
 For example, enabling `info` will enable `info`, `warn` and `error` but not `debug` or `trace`.
+The "special" log level `none` means no log and can only be used to set a namespace level.
 ``` js
 { trace: 0, debug: 1, info: 2, warn: 3, error: 4 }
 ```
@@ -98,20 +100,32 @@ Logger relies on namespaces. When you want to log something, you should define a
 When you debug, this gives you the flexibility to enable only the namespaces you need to output.
 As a good practice, we recommend setting a namespace by folder / file. 
 For example for a file in modules/login/dao you could define 'modules:login:dao'.
+Warning, "=" can't be part of the namespace as it's a reserved symbol.
 
-To toggle a namespace, use setNamespace function. 
-A '-' before the namespace you toggle will disable it and a ':*' means eveything after ':' will be enabled.
+You can also define a level per namespace. If no level is defined, the default global level is used.
+To disable logs of a namespace, you can specify a level `none`
+A namespace ':*' means eveything after ':' will be enabled. Namespaces are parsed as regexp.
 
+To define namespace level, you should suffix namespace with "=the_level" 
+For example let's say you need to enable all info logs but for debug purpose you need to lower the level 
+of the namespace database to `debug`. You could then use : 
+
+``` javascript
+    const logger = require('@ekino/logger')
+    
+    logger.setLevel('info')
+    logger.setNamespaces('*,database*=debug,database:redis*=none')
+```
 #### Using Logging Namespaces
 
 ``` js
     const logger = require('@ekino/logger')
 
-    logger.setNamespaces('namespace:*, -namespace:wrongSubNamespace');
+    logger.setNamespaces('namespace:*, namespace:mute=none');
     logger.setLevel('debug');
   
     const log = logger('namespace:subNamespace');
-    const log2 = logger('namespace:wrongSubNamespace');
+    const log2 = logger('namespace:mute');
     log.debug("Will be logged");
     log2.info("Will not be logged");
 ```
@@ -119,7 +133,7 @@ A '-' before the namespace you toggle will disable it and a ':*' means eveything
 ``` js
     const logger = require('@ekino/logger')
 
-    logger.setNamespaces('*, -wrongNamespace');
+    logger.setNamespaces('*, wrongNamespace=none');
     logger.setLevel('debug');
     
     const log = logger('namespace:subNamespace');

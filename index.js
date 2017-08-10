@@ -11,11 +11,13 @@ const internals = {}
  * @param {String} message - A description
  * @param {Object} [data] - Anything useful to understand the error
  */
+
 /**
  * @typedef {Function} LoggerIsEnabledFunction
  * @param {String} level
  * @returns {Boolean} true if level is enabled
  */
+
 /**
  * @typedef {Object} Logger
  * @property {LoggerLogFunction} trace - Log to trace level
@@ -25,6 +27,13 @@ const internals = {}
  * @property {LoggerLogFunction} error - Log to error level
  * @property {LoggerIsEnabledFunction} isLoggerEnabled - check if logger is enabled for a level
  */
+
+/**
+ * @typedef {Object} NamespaceConfig
+ * @property {number} [level]
+ * @property {RegExp|null} regex
+ */
+
 /************* EXPORTS *************/
 /**
  * @typedef {Function} Logger
@@ -48,21 +57,18 @@ module.exports = function(namespace) {
  * @param {string} namespaces
  */
 module.exports.setNamespaces = function(namespaces) {
-    internals.namespaces = namespaces
-    internals.enabledNamespaces = []
-    internals.disabledNamespaces = []
+    exports.namespaces = namespaces
+    internals.namespaces = []
 
-    namespaces = _.split(namespaces || '', /[\s,]+/)
+    if (_.isEmpty(namespaces)) return internals.syncLoggers()
+
+    namespaces = namespaces.replace(/\s/g, '').split(',')
 
     _.forEach(namespaces, namespace => {
-        if (_.isEmpty(namespace)) return true
+        const parsedNamespace = internals.parseNamespace(namespace)
+        if (!parsedNamespace) return true
 
-        namespace = namespace.replace(/\*/g, '.*?')
-        if (namespace[0] === '-') {
-            internals.disabledNamespaces.push(new RegExp(`^${namespace.substr(1)}$`))
-        } else {
-            internals.enabledNamespaces.push(new RegExp(`^${namespace}$`))
-        }
+        internals.namespaces.push(parsedNamespace)
     })
 
     internals.syncLoggers()
@@ -77,7 +83,11 @@ module.exports.setLevel = function(level) {
         throw new Error(`Invalid level: '${level}'`)
     }
 
-    internals.level = level
+    // expose level name
+    exports.level = level
+
+    // internally store corresponding level index
+    internals.level = _.indexOf(internals.levels, level)
 
     internals.syncLoggers()
 }
@@ -112,19 +122,64 @@ module.exports.setGlobalContext = function(context) {
  */
 module.exports.id = uuid
 
+// Expose raw namespaces config,
+// parsed ones are kept in `internals.namespaces`.
+module.exports.namespaces = ''
+
+// Expose raw level config,
+// index value is kept in the internal code
+module.exports.level = undefined
+
 module.exports.internals = internals
 
 /************* INTERNALS *************/
 internals.loggers = {}
-internals.levels = ['trace', 'debug', 'info', 'warn', 'error']
+internals.levels = ['trace', 'debug', 'info', 'warn', 'error', 'none']
 
 internals.outputs = ['json', 'pretty']
 internals.output = 'json'
-internals.level = 'info'
-internals.namespaces = ''
-internals.enabledNamespaces = []
-internals.disabledNamespaces = []
+
+/**
+ * Internally we store level index as it's quicker to compare numbers
+ */
+internals.level = undefined
+
+/**
+ * Internally store parsed namespaces,
+ * `module.exports.namespaces` contains raw config.
+ *
+ * @type {Array<NamespaceConfig>}
+ */
+internals.namespaces = []
+
 internals.globalContext = {}
+
+/**
+ * Parse a namespace to extract level, namespace (eg: ns1:subns1=info)
+ * @param {string} namespace
+ * @return {NamespaceConfig|null}
+ */
+internals.parseNamespace = function(namespace) {
+    const matches = /([^=]*)(=(.*))?/.exec(namespace)
+    if (!matches) return null
+
+    let level = null
+    if (matches[3]) {
+        const idx = _.indexOf(internals.levels, matches[3])
+        if (idx < 0) throw new Error(`Level ${matches[3]} is not a valid log level : ${internals.levels}`)
+        level = idx
+    }
+
+    let pattern = matches[1]
+    if (_.isEmpty(pattern)) return null
+
+    pattern = pattern.replace(/\*/g, '.*?')
+    const regex = new RegExp(`^${pattern}$`)
+
+    const namespaceConfig = { regex }
+    if (level) namespaceConfig.level = level
+    return namespaceConfig
+}
 
 /**
  * Used to override error toJSON function to customize output
@@ -189,27 +244,20 @@ internals.write = function(output) {
  * @return {Boolean} true if enabled
  */
 internals.isEnabled = function(namespace, level) {
-    if (_.indexOf(internals.levels, level) < _.indexOf(internals.levels, internals.level)) {
-        return false
-    }
+    let nsLevel = internals.level
+    let nsMatch = false
 
-    let i = 0
-    while (i < internals.disabledNamespaces.length) {
-        if (internals.disabledNamespaces[i].test(namespace)) {
-            return false
+    _.forEachRight(internals.namespaces, ns => {
+        if (ns.regex.test(namespace)) {
+            nsMatch = true
+            if (ns.level) {
+                nsLevel = ns.level
+                return false
+            }
         }
-        i += 1
-    }
+    })
 
-    let j = 0
-    while (j < internals.enabledNamespaces.length) {
-        if (internals.enabledNamespaces[j].test(namespace)) {
-            return true
-        }
-        j += 1
-    }
-
-    return false
+    return nsMatch && level >= nsLevel
 }
 
 /**
@@ -231,8 +279,9 @@ internals.syncLogger = function(logger, namespace) {
     })
 
     const enabledLevels = {}
-    _.forEach(internals.levels, level => {
-        if (!internals.isEnabled(namespace, level)) {
+    _.forEach(internals.levels, (level, idx) => {
+        if (level === 'none') return
+        if (!internals.isEnabled(namespace, idx)) {
             enabledLevels[level] = false
             logger[level] = internals.noop
         } else {
@@ -259,8 +308,7 @@ internals.syncLoggers = function() {
 }
 
 /************* INIT *************/
-const namespaces = process.env.LOG
-const level = process.env.LOG_LEVEL || 'error'
+const namespaces = process.env.LOGS || '*'
 
 module.exports.setNamespaces(namespaces)
-module.exports.setLevel(level)
+module.exports.setLevel('warn')
