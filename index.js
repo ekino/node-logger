@@ -1,7 +1,9 @@
 'use strict'
 const _ = require('lodash')
 const uuid = require('uuid')
-const prettyOutput = require('prettyoutput')
+
+const outputAdapters = require('./output_adapters')
+const outputUtils = require('./output_utils')
 
 const internals = {}
 
@@ -26,6 +28,22 @@ const internals = {}
  * @property {LoggerLogFunction} warn  - Log to warning level
  * @property {LoggerLogFunction} error - Log to error level
  * @property {LoggerIsEnabledFunction} isLoggerEnabled - check if logger is enabled for a level
+ */
+
+/**
+ * @typedef {object} Log
+ * @property {string} level       - log level (debug, info, warn, error)
+ * @property {Date} time          - log time
+ * @property {string} namespace   - log namespace
+ * @property {string} contextId   - contextId
+ * @property {object} meta        - Some meta and additional data from globalContext
+ * @property {string} message     - log message
+ * @property {object} [data]      - Additional data to understand log message
+ */
+
+/**
+ * @typedef {Function} OutputAdapter
+ * @param {Log} log to write
  */
 
 /**
@@ -64,7 +82,7 @@ module.exports.setNamespaces = function(namespaces) {
 
     namespaces = namespaces.replace(/\s/g, '').split(',')
 
-    _.forEach(namespaces, namespace => {
+    namespaces.forEach(namespace => {
         const parsedNamespace = internals.parseNamespace(namespace)
         if (!parsedNamespace) return true
 
@@ -87,21 +105,24 @@ module.exports.setLevel = function(level) {
     exports.level = level
 
     // internally store corresponding level index
-    internals.level = _.indexOf(internals.levels, level)
+    internals.level = internals.levels.indexOf(level)
 
     internals.syncLoggers()
 }
 
 /**
- * Change output type. Available values are "pretty" or "json". Default is json
- * @param {string} type
+ * Set outputs transport to use
+ * @param {Array<OutputAdapter>|OutputAdapter} outputs
  */
-module.exports.setOutput = function(type) {
-    if (!internals.outputs.includes(type)) {
-        throw new Error(`Invalid output: '${type}'`)
-    }
+module.exports.setOutput = module.exports.setOutputs = function(outputs) {
+    if (!outputs) outputs = []
+    if (!Array.isArray(outputs)) outputs = [outputs]
 
-    internals.output = type
+    outputs.forEach(output => {
+        if (!_.isFunction(output)) throw new Error(`Invalid output: '${output}'`)
+    })
+
+    internals.outputs = outputs
 }
 
 /**
@@ -130,14 +151,20 @@ module.exports.namespaces = ''
 // index value is kept in the internal code
 module.exports.level = undefined
 
+module.exports.outputs = outputAdapters
+module.exports.outputUtils = outputUtils
+
 module.exports.internals = internals
 
 /************* INTERNALS *************/
 internals.loggers = {}
 internals.levels = ['trace', 'debug', 'info', 'warn', 'error', 'none']
 
-internals.outputs = ['json', 'pretty']
-internals.output = 'json'
+/**
+ * List of output functions
+ * @type {Array<OutputAdapter>}
+ */
+internals.outputs = [outputAdapters.json]
 
 /**
  * Internally we store level index as it's quicker to compare numbers
@@ -182,20 +209,6 @@ internals.parseNamespace = function(namespace) {
 }
 
 /**
- * Used to override error toJSON function to customize output
- * @return {object}
- */
-internals.errorToJson = function() {
-    const result = {}
-
-    Object.getOwnPropertyNames(this).forEach(function(key) {
-        result[key] = this[key]
-    }, this)
-
-    return result
-}
-
-/**
  * Log method. Write to stdout as a JSON object
  * @param {String} namespace
  * @param {String} level
@@ -211,30 +224,22 @@ internals.log = function(namespace, level, contextId, message, data) {
     }
 
     contextId = contextId || module.exports.id()
-    const time = new Date().toISOString()
-    const output = Object.assign({}, internals.globalContext, { level, time, namespace, contextId })
-    if (message) output.message = message
-    if (data) output.data = data
-    internals.write(output)
+    const time = new Date()
+    const log = { level, time, namespace, contextId }
+    log.meta = Object.assign({}, internals.globalContext)
+    if (message) log.message = message
+    if (data) log.data = data
+    internals.write(log)
 }
 
 /**
- * Write output
- * @param {Object} output
+ * Write log using output adapter
+ * @param {Log} log
  */
-internals.write = function(output) {
-    let result = ''
-    if (internals.output === 'pretty') {
-        const prefix = `${output.message}\n`
-        result = `${prefix}${prettyOutput(output, { maxDepth: 6 }, 2)}`
-    } else if (internals.output === 'json') {
-        const backup = Error.prototype.toJSON
-        Error.prototype.toJSON = internals.errorToJson
-        result = JSON.stringify(output)
-        Error.prototype.toJSON = backup
-    }
-    process.stdout.write(result)
-    process.stdout.write('\n')
+internals.write = function(log) {
+    internals.outputs.forEach(outputFn => {
+        outputFn(log)
+    })
 }
 
 /**
@@ -261,7 +266,7 @@ internals.isEnabled = function(namespace, level) {
 }
 
 /**
- * A no op function to be used for disabled loggers.
+ * A noop function to be used for disabled loggers.
  */
 internals.noop = () => {}
 
@@ -279,7 +284,7 @@ internals.syncLogger = function(logger, namespace) {
     })
 
     const enabledLevels = {}
-    _.forEach(internals.levels, (level, idx) => {
+    internals.levels.forEach((level, idx) => {
         if (level === 'none') return
         if (!internals.isEnabled(namespace, idx)) {
             enabledLevels[level] = false

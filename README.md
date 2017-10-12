@@ -31,11 +31,14 @@ yarn add @ekino/logger
 ## Usage
 
 By default, the logger output warn and error levels for all namespaces.
-You have the ability to set another global log `level` and/or add overrides per `namespace.
+By default, it writes logs to stdout in JSON format
+
+The logger api allows you to set log level for all namespaces. For advanced usage, you define it even per namespace.
 
 A log instance is bounded to a namespace. To use it, instantiate a logger with a namespace and call a log function.
 
-There are 5 available log levels by a priority. When you set a log level, all levels over it are enabled too.
+This logger define 5 log levels: error, warn, info, debug, trace.
+When you set a level, all levels above it are enabled too.
 Log level can be set by calling `setLevel` function. 
 
 For example, enabling `info` will enable `info`, `warn` and `error` but not `debug` or `trace`.
@@ -64,12 +67,12 @@ Example
 ```
 output : 
 
-![Example](docs/images/example_usage1.png)
+![Example](docs/images/example_usage1.gif)
 
 ### Using context ID
 
 One of the main complexity working with node is ability to follow all logs attached to one call or one function.
-This is not mandatory, but based on our experience, we recommmend as a best practice to add a unique identifier that will be passed all along functions calls.
+This is not mandatory, but based on our experience, we recommend as a best practice to add a unique identifier that will be passed all along functions calls.
 When you log something, you can provide this id as a first parameter and logger will log it. If not provided, it's auto generated.
 
 The signature of the function with contextId is : 
@@ -92,7 +95,7 @@ Example app.js
 ```
 output : 
 
-![Example](docs/images/example_usage2.png)
+![Example](docs/images/example_usage2.gif)
 
 ### Using namespaces
 
@@ -144,7 +147,10 @@ of the namespace database to `debug`. You could then use :
 
 ### Outputs
 
-For now, the logger provides two output type: `pretty` and `json`, default is `json`.
+Logger allow you to provide your own output adapter to customize how and where to write logs.
+It's bundle by default with `pretty` adapter and `json` that both write to stdout.
+By default, json adapter is enabled.
+You can use multiple adapters at the same time
 
 #### JSON
 
@@ -153,14 +159,14 @@ For now, the logger provides two output type: `pretty` and `json`, default is `j
       
     logger.setNamespaces('namespace:*');
     logger.setLevel('debug');
-    //logger.setOutput('json');
+    logger.setOutput(logger.outputs.json);
       
     const log = logger('namespace:subNamespace');
     log.debug('ctxId', 'Will be logged',{someData: 'someValue', someData2: 'someValue'});
 ```
 output : 
 
-![Example](docs/images/example_usage3.png)
+![Example](docs/images/example_usage3.gif)
 
 #### Pretty
 
@@ -169,17 +175,62 @@ Pretty will output a yaml like content.
 ``` js
     const logger = require('@ekino/logger')
       
-   logger.setNamespaces('namespace:*');
-   logger.setLevel('debug');
-   logger.setOutput('pretty');
+    logger.setNamespaces('namespace:*');
+    logger.setLevel('debug');
+    logger.setOutput(logger.outputs.pretty);
    
-   const log = logger('namespace:subNamespace');
-   log.debug('ctxId', 'Will be logged',{someData: 'someValue', someData2: 'someValue'});
+    const log = logger('namespace:subNamespace');
+    log.debug('ctxId', 'Will be logged',{someData: 'someValue', someData2: 'someValue'});
 ```
 output : 
 
-![Example](docs/images/example_pretty.png)
+![Example](docs/images/example_pretty.gif)
 
+#### Output function
+An output, is a function that will receive log data and should transform and store it
+
+Log data follow the format : 
+```
+{
+    time: Date,
+    level: string,
+    namespace: string,
+    contextId: string,
+    meta: { any data defined in global context },
+    message: string,
+    data: object
+}
+```
+
+``` js
+   const logger = require('@ekino/logger')
+      
+   logger.setNamespaces('namespace:*');
+   logger.setLevel('debug');
+   
+   function consoleAdapter(log) {
+      console.log(logger.outputUtils.stringify(log))
+   }
+ 
+   // This will output in stdout with the pretty output 
+   // and in the same will log through native console.log() function (usually to stdout too)
+   logger.setOutput([logger.output.pretty, consoleAdapter]);
+ 
+   const log = logger('namespace:subNamespace');
+   log.debug('ctxId', 'Will be logged',{someData: 'someValue', someData2: 'someValue'});
+```
+
+#### JSON Stringify utility
+To ease the creation of an output adapter, we provide a utility to stringify a json object that support circular reference
+and add stack to output for errors.
+
+``` js
+   const logger = require('@ekino/logger')
+
+   function consoleAdapter(log) {
+      console.log(logger.outputUtils.stringify(log))
+   }
+```
 ### Log data
 
 Most of the time, a log message is not enough to guess context.
@@ -200,7 +251,7 @@ If you're using some kind of log collector, you'll then be able to extract those
 
 output : 
 
-![Example](docs/images/example_data.png)
+![Example](docs/images/example_data.gif)
 
 #### Adding global metadata
 
@@ -222,7 +273,7 @@ To do so, we provide a function to set informations that will be added to the ea
 
 output : 
 
-![Example](docs/images/example_context.png)
+![Example](docs/images/example_context.gif)
 
 [npm-image]: https://img.shields.io/npm/v/@ekino/logger.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/@ekino/logger
