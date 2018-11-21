@@ -22,21 +22,21 @@
   "license": "MIT",
   "version": "0.2.0",
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=6"
   },
   "dependencies": {
-    "lodash": "4.x.x",
-    "prettyoutput": "1.x.x",
-    "uuid": "3.x.x"
+    "lodash": "4.x",
+    "prettyoutput": "1.x",
+    "uuid": "3.x"
   },
   "devDependencies": {
-    "ava": "0.21.0",
-    "coveralls": "^2.13.1",
-    "eslint": "4.4.1",
+    "ava": "1.0.0-rc.2",
+    "coveralls": "2.x",
+    "eslint": "5.x",
     "git-changelog": "1.1.2",
-    "nyc": "11.1.0",
-    "prettier": "1.5.3",
-    "sinon": "3.2.0"
+    "nyc": "13.x",
+    "prettier": "1.x",
+    "sinon": "7.x"
   },
   "scripts": {
     "fmt": "prettier --print-width 140 --tab-width=4 --single-quote --bracket-spacing --no-semi --color --write index.js",

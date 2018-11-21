@@ -1,7 +1,7 @@
 'use strict'
 /* eslint-disable no-shadow */
 
-const { test } = require('ava')
+const test = require('ava')
 const sinon = require('sinon')
 
 const logger = require('../index')
