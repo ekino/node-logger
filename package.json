@@ -22,16 +22,17 @@
   "license": "MIT",
   "version": "0.2.0",
   "engines": {
-    "node": ">=6"
+    "node": ">=8"
   },
   "dependencies": {
+    "colors": "1.x",
     "lodash": "4.x",
     "prettyoutput": "1.x",
     "uuid": "3.x"
   },
   "devDependencies": {
-    "ava": "1.0.0-rc.2",
-    "coveralls": "2.x",
+    "ava": "1.x",
+    "coveralls": "3.x",
     "eslint": "5.x",
     "git-changelog": "1.1.2",
     "nyc": "13.x",
@@ -39,8 +40,8 @@
     "sinon": "7.x"
   },
   "scripts": {
-    "fmt": "prettier --print-width 140 --tab-width=4 --single-quote --bracket-spacing --no-semi --color --write index.js",
-    "check-fmt": "prettier --print-width 140 --tab-width=4 --single-quote --bracket-spacing --no-semi --list-different index.js",
+    "fmt": "prettier --print-width 140 --tab-width=4 --single-quote --bracket-spacing --no-semi --color --write \"{.,{test}/**/}/*.js\"",
+    "check-fmt": "prettier --print-width 140 --tab-width=4 --single-quote --bracket-spacing --no-semi --list-different \"{.,{test}/**/}/*.js\"",
     "test": "ava",
     "test-cover": "nyc ava",
     "coverage": "nyc report --reporter=text-lcov | coveralls",

@@ -6,14 +6,8 @@ const sinon = require('sinon')
 
 const logger = require('../index')
 
-const stdoutWrite = process.stdout.write
-
 test.beforeEach(t => {
-    process.stdout.write = () => {}
-})
-
-test.afterEach(t => {
-    process.stdout.write = stdoutWrite
+    logger.setOutput([])
 })
 
 test('A logger instance should have levels function and isLevelEnabled function', t => {
@@ -27,7 +21,7 @@ test('A logger instance should have levels function and isLevelEnabled function'
     t.is(typeof log.none, 'undefined')
 })
 
-test('A logger instance should only accept allowed outputs', t => {
+test('A logger instance should only accept functions', t => {
     const error = t.throws(() => {
         logger.setOutput('invalid')
     }, Error)
@@ -114,7 +108,7 @@ test("A logger instance should log if log level is higher or equal than namespac
     logger.internals.write.restore()
 })
 
-    test("A logger instance should log according to state defined in the latest matching namespace in the list", t => {
+test("A logger instance should log according to state defined in the latest matching namespace in the list", t => {
     logger.setNamespaces('test:*=warn,test2:*,test:*=error,test2:*=none')
 
     logger.setLevel('info')
@@ -130,34 +124,83 @@ test("A logger instance should log if log level is higher or equal than namespac
     logger.internals.write.restore()
 })
 
-test('A logger should write a Json Object with expected data and an \\n to stdout if enabled', t => {
+test('A logger should call an output adapter with log data, metadata, message and data', t => {
     logger.setNamespaces('test:*')
     logger.setLevel('info')
+
+    const outputAdapter = sinon.spy()
+    logger.setOutput(outputAdapter)
 
     const now = new Date()
 
     const log = logger('test:subTest')
-    const spy = sinon.spy(process.stdout, 'write')
     const timersStub = sinon.useFakeTimers(now.getTime())
 
     log.warn('ctxId', 'test', { someData: 'someValue' })
 
-    t.true(spy.calledTwice)
+    t.true(outputAdapter.calledOnce)
 
-    const firstCall = spy.firstCall.args[0]
-    const secondCall = spy.secondCall.args[0]
-    const parsedObject = JSON.parse(firstCall)
+    const outputArg = outputAdapter.firstCall.args[0]
 
-    t.is(parsedObject.namespace, 'test:subTest')
-    t.is(parsedObject.level, 'warn')
-    t.is(parsedObject.time, now.toISOString())
-    t.is(parsedObject.contextId, 'ctxId')
-    t.is(parsedObject.message, 'test')
-    t.deepEqual(parsedObject.data, { someData: 'someValue' })
-    t.is(secondCall, '\n')
 
-    process.stdout.write.restore()
+    t.is(outputArg.namespace, 'test:subTest')
+    t.is(outputArg.level, 'warn')
+    t.is(outputArg.time.getTime(), now.getTime())
+    t.is(outputArg.contextId, 'ctxId')
+    t.is(outputArg.message, 'test')
+    t.deepEqual(outputArg.data, { someData: 'someValue' })
+
     timersStub.restore()
+})
+
+test('A logger should call all output output adapters added', t => {
+    logger.setNamespaces('test:*')
+    logger.setLevel('info')
+
+    const outputAdapter1 = sinon.spy()
+    const outputAdapter2 = sinon.spy()
+    logger.setOutput([outputAdapter1, outputAdapter2])
+
+    const now = new Date()
+
+    const log = logger('test:subTest')
+    const timersStub = sinon.useFakeTimers(now.getTime())
+
+    log.warn('ctxId', 'test', { someData: 'someValue' })
+
+    t.true(outputAdapter1.calledOnce)
+    t.true(outputAdapter2.calledOnce)
+
+    const outputArg1 = outputAdapter1.firstCall.args[0]
+    const outputArg2 = outputAdapter2.firstCall.args[0]
+
+    t.is(outputArg1.namespace, 'test:subTest')
+    t.is(outputArg1.level, 'warn')
+    t.is(outputArg1.time.getTime(), now.getTime())
+    t.is(outputArg1.contextId, 'ctxId')
+    t.is(outputArg1.message, 'test')
+    t.deepEqual(outputArg1.data, { someData: 'someValue' })
+
+    t.is(outputArg2.namespace, 'test:subTest')
+    t.is(outputArg2.level, 'warn')
+    t.is(outputArg2.time.getTime(), now.getTime())
+    t.is(outputArg2.contextId, 'ctxId')
+    t.is(outputArg2.message, 'test')
+    t.deepEqual(outputArg2.data, { someData: 'someValue' })
+
+    timersStub.restore()
+})
+
+test('A logger shoudn\'t throw an error if not outputs defined', t => {
+    logger.setNamespaces('test:*')
+    logger.setLevel('info')
+
+    logger.setOutput()
+
+    const log = logger('test:subTest')
+
+    log.warn('ctxId', 'test', { someData: 'someValue' })
+    t.true(true)
 })
 
 test('A logger should support defining a global context', t => {
@@ -165,30 +208,28 @@ test('A logger should support defining a global context', t => {
     logger.setLevel('info')
     logger.setGlobalContext({ service: 'logger', mode: 'testing' })
 
+    const outputAdapter = sinon.spy()
+    logger.setOutput(outputAdapter)
+
     const now = new Date()
 
     const log = logger('test:global:context')
-    const spy = sinon.spy(process.stdout, 'write')
     const timersStub = sinon.useFakeTimers(now.getTime())
 
     log.warn('ctxId', 'test')
 
-    t.true(spy.calledTwice)
+    t.true(outputAdapter.calledOnce)
 
-    const firstCall = spy.firstCall.args[0]
-    const secondCall = spy.secondCall.args[0]
-    const parsedObject = JSON.parse(firstCall)
+    const outputArg = outputAdapter.firstCall.args[0]
 
-    t.is(parsedObject.namespace, 'test:global:context')
-    t.is(parsedObject.level, 'warn')
-    t.is(parsedObject.time, now.toISOString())
-    t.is(parsedObject.contextId, 'ctxId')
-    t.is(parsedObject.service, 'logger')
-    t.is(parsedObject.mode, 'testing')
-    t.is(parsedObject.message, 'test')
-    t.is(secondCall, '\n')
+    t.is(outputArg.namespace, 'test:global:context')
+    t.is(outputArg.level, 'warn')
+    t.is(outputArg.time.getTime(), now.getTime())
+    t.is(outputArg.contextId, 'ctxId')
+    t.is(outputArg.meta.service, 'logger')
+    t.is(outputArg.meta.mode, 'testing')
+    t.is(outputArg.message, 'test')
 
-    process.stdout.write.restore()
     timersStub.restore()
 })
 
@@ -196,28 +237,26 @@ test('A logger contextId arg should be an an optional argument', t => {
     logger.setNamespaces('ns1:*')
     logger.setLevel('info')
 
+    const outputAdapter = sinon.spy()
+    logger.setOutput(outputAdapter)
+
     const now = new Date()
 
     const log = logger('ns1:subns1')
-    const spy = sinon.spy(process.stdout, 'write')
     const timersStub = sinon.useFakeTimers(now.getTime())
 
     log.warn('msg1', { key1: 'value1' })
 
-    t.true(spy.calledTwice)
+    t.true(outputAdapter.calledOnce)
 
-    const firstCall = spy.firstCall.args[0]
-    const secondCall = spy.secondCall.args[0]
-    const parsedObject = JSON.parse(firstCall)
+    const outputArg = outputAdapter.firstCall.args[0]
 
-    t.is(parsedObject.level, 'warn')
-    t.is(parsedObject.time, now.toISOString())
-    t.is(typeof parsedObject.contextId, 'string')
-    t.is(parsedObject.message, 'msg1')
-    t.deepEqual(parsedObject.data, { key1: 'value1' })
-    t.is(secondCall, '\n')
+    t.is(outputArg.level, 'warn')
+    t.is(outputArg.time.getTime(), now.getTime())
+    t.is(typeof outputArg.contextId, 'string')
+    t.is(outputArg.message, 'msg1')
+    t.deepEqual(outputArg.data, { key1: 'value1' })
 
-    process.stdout.write.restore()
     timersStub.restore()
 })
 
