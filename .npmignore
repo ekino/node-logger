@@ -17,8 +17,9 @@ node_modules
 # Optional npm cache directory
 .npm
 
-# tests
+# tests & examples
 /test
+/examples
 
 # IDE
 .idea
@@ -28,3 +29,4 @@ Makefile
 .eslintrc.yml
 .gitignore
 .changelogrc
+.prettierrc
