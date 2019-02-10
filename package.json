@@ -43,8 +43,8 @@
     "typescript": "3.x"
   },
   "scripts": {
-    "fmt": "prettier --print-width 140 --tab-width=4 --single-quote --bracket-spacing --no-semi --color --write \"{.,{test}/**/}/*.{js,ts}\"",
-    "check-fmt": "prettier --print-width 140 --tab-width=4 --single-quote --bracket-spacing --no-semi --list-different \"{.,{test}/**/}/*.{js,ts}\"",
+    "fmt": "prettier --color --write \"{.,{test}/**/}/*.{js,ts}\"",
+    "check-fmt": "prettier --list-different \"{.,{test}/**/}/*.{js,ts}\"",
     "tsc": "tsc",
     "test": "ava",
     "test-cover": "nyc ava",
