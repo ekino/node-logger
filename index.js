@@ -54,11 +54,11 @@ const internals = {}
 
 /************* EXPORTS *************/
 /**
- * @typedef {Function} Logger
- * @param {String} namespace
+ * @typedef {Function} createLogger
+ * @param {String} [namespace]
  * @return {Logger}
  */
-module.exports = function(namespace) {
+module.exports.createLogger = function(namespace) {
     namespace = namespace || ''
 
     let logger = internals.loggers[namespace]

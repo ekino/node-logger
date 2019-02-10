@@ -11,7 +11,7 @@ test.beforeEach(t => {
 })
 
 test('A logger instance should have levels function and isLevelEnabled function', t => {
-    const log = logger()
+    const log = logger.createLogger()
     t.is(typeof log.trace, 'function')
     t.is(typeof log.debug, 'function')
     t.is(typeof log.info, 'function')
@@ -41,7 +41,7 @@ test('A logger instance should log if level and namespace are enabled', t => {
     logger.setNamespaces('*')
     logger.setLevel('info')
 
-    const log = logger()
+    const log = logger.createLogger()
     const spy = sinon.spy(logger.internals, 'write')
 
     log.info(null)
@@ -54,7 +54,7 @@ test("A logger instance shouldn't log if level is lower than enabled level", t =
     logger.setNamespaces('*')
     logger.setLevel('info')
 
-    const log = logger()
+    const log = logger.createLogger()
     const spy = sinon.spy(logger.internals, 'write')
 
     log.debug(null, 'test')
@@ -69,7 +69,7 @@ test("A logger instance shouldn't log if namespace is not enabled", t => {
 
     logger.setLevel('info')
 
-    const log = logger('default')
+    const log = logger.createLogger('default')
     const spy = sinon.spy(logger.internals, 'write')
 
     log.info(null, 'test')
@@ -84,7 +84,7 @@ test("A logger instance shouldn't log if log level is lower than namespace patte
 
     logger.setLevel('info')
 
-    const log = logger('test:subtest')
+    const log = logger.createLogger('test:subtest')
     const spy = sinon.spy(logger.internals, 'write')
 
     log.info(null, 'test')
@@ -99,7 +99,7 @@ test("A logger instance should log if log level is higher or equal than namespac
 
     logger.setLevel('info')
 
-    const log = logger('test:subtest')
+    const log = logger.createLogger('test:subtest')
     const spy = sinon.spy(logger.internals, 'write')
 
     log.debug(null)
@@ -113,8 +113,8 @@ test("A logger instance should log according to state defined in the latest matc
 
     logger.setLevel('info')
 
-    const log = logger('test:subtest')
-    const log2 = logger('test2:subtest')
+    const log = logger.createLogger('test:subtest')
+    const log2 = logger.createLogger('test2:subtest')
     const spy = sinon.spy(logger.internals, 'write')
 
     log.warn(null)
@@ -133,7 +133,7 @@ test('A logger should call an output adapter with log data, metadata, message an
 
     const now = new Date()
 
-    const log = logger('test:subTest')
+    const log = logger.createLogger('test:subTest')
     const timersStub = sinon.useFakeTimers(now.getTime())
 
     log.warn('ctxId', 'test', { someData: 'someValue' })
@@ -163,7 +163,7 @@ test('A logger should call all output output adapters added', t => {
 
     const now = new Date()
 
-    const log = logger('test:subTest')
+    const log = logger.createLogger('test:subTest')
     const timersStub = sinon.useFakeTimers(now.getTime())
 
     log.warn('ctxId', 'test', { someData: 'someValue' })
@@ -197,7 +197,7 @@ test('A logger shoudn\'t throw an error if not outputs defined', t => {
 
     logger.setOutput()
 
-    const log = logger('test:subTest')
+    const log = logger.createLogger('test:subTest')
 
     log.warn('ctxId', 'test', { someData: 'someValue' })
     t.true(true)
@@ -213,7 +213,7 @@ test('A logger should support defining a global context', t => {
 
     const now = new Date()
 
-    const log = logger('test:global:context')
+    const log = logger.createLogger('test:global:context')
     const timersStub = sinon.useFakeTimers(now.getTime())
 
     log.warn('ctxId', 'test')
@@ -242,7 +242,7 @@ test('A logger contextId arg should be an an optional argument', t => {
 
     const now = new Date()
 
-    const log = logger('ns1:subns1')
+    const log = logger.createLogger('ns1:subns1')
     const timersStub = sinon.useFakeTimers(now.getTime())
 
     log.warn('msg1', { key1: 'value1' })
@@ -264,7 +264,7 @@ test("A logger should not log if it's namespace is disabled after call to setNam
     logger.setNamespaces('*')
     logger.setLevel('info')
 
-    const log = logger('ns1')
+    const log = logger.createLogger('ns1')
     const spy = sinon.spy(logger.internals, 'write')
 
     log.info(null, 'msg1')
@@ -281,7 +281,7 @@ test('A logger should not log if log level is not upper after call to setLevel',
     logger.setNamespaces('*')
     logger.setLevel('info')
 
-    const log = logger('ns1')
+    const log = logger.createLogger('ns1')
     const spy = sinon.spy(logger.internals, 'write')
 
     log.info(null, 'msg1')
@@ -298,7 +298,7 @@ test('A logger should not log if upper namespace was enabled, but sub namespace 
     logger.setNamespaces('ns1:*,ns1:subns1=none')
     logger.setLevel('info')
 
-    const log = logger('ns1:subns1')
+    const log = logger.createLogger('ns1:subns1')
     const spy = sinon.spy(logger.internals, 'write')
 
     log.info(null, 'msg1')
@@ -312,7 +312,7 @@ test('A logger should return true for a call to isLevelEnabled if level and name
     logger.setNamespaces('ns1:*,ns1:subns1=none')
     logger.setLevel('info')
 
-    const log = logger('ns1:subns2')
+    const log = logger.createLogger('ns1:subns2')
     t.true(log.isLevelEnabled('warn'))
 })
 
@@ -320,7 +320,7 @@ test('A logger should return false for a call to isLevelEnabled if namespace lev
     logger.setNamespaces('ns1:*,ns1:subns1=none')
     logger.setLevel('info')
 
-    const log = logger('ns1:subns1')
+    const log = logger.createLogger('ns1:subns1')
     t.false(log.isLevelEnabled('warn'))
 })
 
@@ -328,7 +328,7 @@ test('A logger should return true for a call to isLevelEnabled if top namespace 
     logger.setNamespaces('ns1:*,ns1:subns1=none')
     logger.setLevel('error')
 
-    const log = logger('ns1:subns2')
+    const log = logger.createLogger('ns1:subns2')
     t.false(log.isLevelEnabled('warn'))
 })
 
@@ -336,8 +336,8 @@ test('loggers should be equal if they are for the same namespace', t => {
     logger.setNamespaces('ns1:*,ns1:subns1=none')
     logger.setLevel('error')
 
-    const log1 = logger('ns1:subns2')
-    const log2 = logger('ns1:subns2')
+    const log1 = logger.createLogger('ns1:subns2')
+    const log2 = logger.createLogger('ns1:subns2')
     t.is(log1, log2)
 })
 

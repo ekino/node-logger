@@ -63,7 +63,7 @@ test('JSON Output Adpater should work if used by logger', t => {
     const spy = sinon.spy(process.stdout, 'write')
     const timersStub = sinon.useFakeTimers(now.getTime())
 
-    const log = logger('test:subTest')
+    const log = logger.createLogger('test:subTest')
     log.warn('ctxId', 'test', { someData: 'someValue' })
 
     t.true(spy.calledTwice)
@@ -126,7 +126,7 @@ test('pretty output adapter should work if used by logger', t => {
     const spy = sinon.spy(process.stdout, 'write')
     const timersStub = sinon.useFakeTimers(1547205226232)
 
-    const log = logger('test:subTest')
+    const log = logger.createLogger('test:subTest')
     log.warn('ctxId', 'test', { someData: 'someValue' })
 
     t.true(spy.calledTwice)
