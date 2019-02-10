@@ -13,6 +13,7 @@ A Lightweight logger that combines debug namespacing capabilities with winston l
     - [Using namespaces](#using-namespaces)
     - [Outputs](#outputs)
     - [Metadata](#metadata)
+- [TypeScript](#typescript)
 
 ## Installation
 
@@ -295,6 +296,10 @@ logger.warn('message', { someData: 'someValue' })
 output: 
 
 ![Example](docs/images/example_context.gif)
+
+## TypeScript
+
+This package provides its own definition, so it can be easily used with TypeScript.
 
 [npm-image]: https://img.shields.io/npm/v/@ekino/logger.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/@ekino/logger
