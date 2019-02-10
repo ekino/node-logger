@@ -5,7 +5,7 @@ exports.internals = internals
  * Replace circular reference when used with JSON.stringify
  * Usage : JSON.stringify(element, internals.newCircularReplacer())
  */
-exports.newCircularReplacer = () => {
+internals.newCircularReplacer = () => {
     const seen = new WeakSet()
     return (key, value) => {
         if (typeof value === 'object' && value !== null) {
@@ -31,7 +31,7 @@ exports.stringify = log => {
     try {
         result = JSON.stringify(log)
     } catch (e) {
-        result = JSON.stringify(log, exports.newCircularReplacer())
+        result = JSON.stringify(log, internals.newCircularReplacer())
     }
     Error.prototype.toJSON = backup
 
@@ -42,7 +42,7 @@ exports.stringify = log => {
  * Used to override error toJSON function to customize output
  * @return {object}
  */
-exports.errorToJson = function() {
+internals.errorToJson = function() {
     const result = {}
 
     Object.getOwnPropertyNames(this).forEach(function(key) {

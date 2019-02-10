@@ -3,7 +3,7 @@ const outputUtils = require('../output_utils')
 
 test('errorToJson should expose error stack through a json stringify', t => {
     const backup = Error.prototype.toJSON
-    Error.prototype.toJSON = outputUtils.errorToJson
+    Error.prototype.toJSON = outputUtils.internals.errorToJson
     const e = new Error()
     const result = JSON.stringify(e)
     Error.prototype.toJSON = backup

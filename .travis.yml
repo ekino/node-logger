@@ -6,6 +6,7 @@ node_js:
 script:
   - yarn run lint
   - yarn run check-fmt
+  - yarn run tsc
   - yarn run test-cover
 after_success:
   - yarn run coverage

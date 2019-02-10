@@ -2,6 +2,8 @@
   "name": "@ekino/logger",
   "description": "A Lightweight logger that combines debug namespacing capabilities with winston levels and multioutput",
   "homepage": "https://github.com/ekino/node-logger",
+  "main": "index.js",
+  "types": "index.d.ts",
   "tags": [
     "logger",
     "lightweight",
@@ -37,11 +39,13 @@
     "git-changelog": "1.1.2",
     "nyc": "13.x",
     "prettier": "1.x",
-    "sinon": "7.x"
+    "sinon": "7.x",
+    "typescript": "3.x"
   },
   "scripts": {
-    "fmt": "prettier --print-width 140 --tab-width=4 --single-quote --bracket-spacing --no-semi --color --write \"{.,{test}/**/}/*.js\"",
-    "check-fmt": "prettier --print-width 140 --tab-width=4 --single-quote --bracket-spacing --no-semi --list-different \"{.,{test}/**/}/*.js\"",
+    "fmt": "prettier --print-width 140 --tab-width=4 --single-quote --bracket-spacing --no-semi --color --write \"{.,{test}/**/}/*.{js,ts}\"",
+    "check-fmt": "prettier --print-width 140 --tab-width=4 --single-quote --bracket-spacing --no-semi --list-different \"{.,{test}/**/}/*.{js,ts}\"",
+    "tsc": "tsc",
     "test": "ava",
     "test-cover": "nyc ava",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
