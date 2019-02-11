@@ -1,11 +1,8 @@
 // Type definitions for @ekino/logger
 // Project: https://github.com/ekino/node-logger
 
-export = logger
-
-declare function logger(namespace: string): logger.Logger
-
 declare namespace logger {
+    export function createLogger(namespace?: string): Logger
     export function setNamespaces(namespace: string): void
     export function setLevel(level: LogLevel): void
     export function setOutput(adapter: OutputAdapter): void
