@@ -24,7 +24,7 @@
   "license": "MIT",
   "version": "0.2.0",
   "engines": {
-    "node": ">=8"
+    "node": ">=8.9.4"
   },
   "dependencies": {
     "colors": "1.x",
@@ -33,11 +33,11 @@
     "uuid": "3.x"
   },
   "devDependencies": {
-    "ava": "1.x",
+    "ava": "2.x",
     "coveralls": "3.x",
-    "eslint": "5.x",
+    "eslint": "6.x",
     "git-changelog": "1.1.2",
-    "nyc": "13.x",
+    "nyc": "14.x",
     "prettier": "1.x",
     "sinon": "7.x",
     "typescript": "3.x"
