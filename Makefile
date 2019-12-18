@@ -50,7 +50,7 @@ release: ##@release generates a new release
 	@echo "${YELLOW}building release ${RELEASE_VERSION} from ${FROM_VERSION}${RESET}"
 	@-git stash
 	@make update-package-version
-	@make changelog FROM=${FROM_VERSION}
+	@make changelog
 	@git add package.json CHANGELOG.md
 	@git commit -m "chore(v${RELEASE_VERSION}): bump version to ${RELEASE_VERSION}"
 	@git tag -a "v${RELEASE_VERSION}" -m "version ${RELEASE_VERSION}"

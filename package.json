@@ -33,10 +33,13 @@
     "uuid": "3.x"
   },
   "devDependencies": {
+    "@commitlint/config-conventional": "8.x",
     "ava": "2.x",
+    "commitlint": "8.x",
+    "conventional-changelog-cli": "2.x",
     "coveralls": "3.x",
     "eslint": "6.x",
-    "git-changelog": "1.1.2",
+    "husky": "3.x",
     "nyc": "14.x",
     "prettier": "1.x",
     "sinon": "7.x",
@@ -49,7 +52,7 @@
     "test": "ava",
     "test-cover": "nyc ava",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "changelog": "git-changelog -t false -n v${npm_package_version}",
+    "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s -r 0",
     "version": "echo ${npm_package_version}",
     "lint": "eslint ."
   }
