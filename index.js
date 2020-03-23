@@ -314,6 +314,7 @@ internals.syncLoggers = function() {
 
 /************* INIT *************/
 const namespaces = process.env.LOGS || '*'
+const logLevel = process.env.LOG_LEVEL || 'warn'
 
 module.exports.setNamespaces(namespaces)
-module.exports.setLevel('warn')
+module.exports.setLevel(logLevel)
