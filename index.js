@@ -58,7 +58,7 @@ const internals = {}
  * @param {String} [namespace]
  * @return {Logger}
  */
-module.exports.createLogger = function(namespace) {
+module.exports.createLogger = function (namespace) {
     namespace = namespace || ''
 
     let logger = internals.loggers[namespace]
@@ -74,7 +74,7 @@ module.exports.createLogger = function(namespace) {
  * Define enabled / disabled namespaces
  * @param {string} namespaces
  */
-module.exports.setNamespaces = function(namespaces) {
+module.exports.setNamespaces = function (namespaces) {
     exports.namespaces = namespaces
     internals.namespaces = []
 
@@ -82,7 +82,7 @@ module.exports.setNamespaces = function(namespaces) {
 
     namespaces = namespaces.replace(/\s/g, '').split(',')
 
-    namespaces.forEach(namespace => {
+    namespaces.forEach((namespace) => {
         const parsedNamespace = internals.parseNamespace(namespace)
         if (!parsedNamespace) return true
 
@@ -96,7 +96,7 @@ module.exports.setNamespaces = function(namespaces) {
  * Change log level
  * @param {string} level - one of trace, debug, info, warn, error
  */
-module.exports.setLevel = function(level) {
+module.exports.setLevel = function (level) {
     if (!internals.levels.includes(level)) {
         throw new Error(`Invalid level: '${level}'`)
     }
@@ -114,11 +114,11 @@ module.exports.setLevel = function(level) {
  * Set outputs transport to use
  * @param {Array<OutputAdapter>|OutputAdapter} outputs
  */
-module.exports.setOutput = module.exports.setOutputs = function(outputs) {
+module.exports.setOutput = module.exports.setOutputs = function (outputs) {
     if (!outputs) outputs = []
     if (!Array.isArray(outputs)) outputs = [outputs]
 
-    outputs.forEach(output => {
+    outputs.forEach((output) => {
         if (!_.isFunction(output)) throw new Error(`Invalid output: '${output}'`)
     })
 
@@ -132,7 +132,7 @@ module.exports.setOutput = module.exports.setOutputs = function(outputs) {
  * even those from third party libraries if they use this module.
  * @param {Object} context - The object holding default context data
  */
-module.exports.setGlobalContext = function(context) {
+module.exports.setGlobalContext = function (context) {
     internals.globalContext = context
 }
 
@@ -141,7 +141,9 @@ module.exports.setGlobalContext = function(context) {
  * Return an id that can be used as a contextId
  * @return {string}
  */
-module.exports.id = uuid
+module.exports.id = () => {
+    return uuid.v4()
+}
 
 // Expose raw namespaces config,
 // parsed ones are kept in `internals.namespaces`.
@@ -186,7 +188,7 @@ internals.globalContext = {}
  * @param {string} namespace
  * @return {NamespaceConfig|null}
  */
-internals.parseNamespace = function(namespace) {
+internals.parseNamespace = function (namespace) {
     const matches = /([^=]*)(=(.*))?/.exec(namespace)
     if (!matches) return null
 
@@ -216,7 +218,7 @@ internals.parseNamespace = function(namespace) {
  * @param {String} message
  * @param {Object} [data] - An object holding data to help understand the error
  */
-internals.log = function(namespace, level, contextId, message, data) {
+internals.log = function (namespace, level, contextId, message, data) {
     if (typeof message !== 'string') {
         data = message
         message = contextId
@@ -236,8 +238,8 @@ internals.log = function(namespace, level, contextId, message, data) {
  * Write log using output adapter
  * @param {Log} log
  */
-internals.write = function(log) {
-    internals.outputs.forEach(outputFn => {
+internals.write = function (log) {
+    internals.outputs.forEach((outputFn) => {
         outputFn(log)
     })
 }
@@ -248,11 +250,11 @@ internals.write = function(log) {
  * @param {String} level
  * @return {Boolean} true if enabled
  */
-internals.isEnabled = function(namespace, level) {
+internals.isEnabled = function (namespace, level) {
     let nsLevel = internals.level
     let nsMatch = false
 
-    _.forEachRight(internals.namespaces, ns => {
+    _.forEachRight(internals.namespaces, (ns) => {
         if (ns.regex.test(namespace)) {
             nsMatch = true
             if (ns.level) {
@@ -278,7 +280,7 @@ internals.noop = () => {}
  * @param {String} namespace
  * @return {Logger}
  */
-internals.syncLogger = function(logger, namespace) {
+internals.syncLogger = function (logger, namespace) {
     _.forOwn(logger, (value, key) => {
         delete logger[key]
     })
@@ -291,13 +293,13 @@ internals.syncLogger = function(logger, namespace) {
             logger[level] = internals.noop
         } else {
             enabledLevels[level] = true
-            logger[level] = function(contextId, message, data) {
+            logger[level] = function (contextId, message, data) {
                 internals.log(namespace, level, contextId, message, data)
             }
         }
     })
 
-    logger.isLevelEnabled = level => enabledLevels[level]
+    logger.isLevelEnabled = (level) => enabledLevels[level]
 
     return logger
 }
@@ -306,7 +308,7 @@ internals.syncLogger = function(logger, namespace) {
  * Resync all loggers level functions to enable / disable them
  * This should be called when namespaces or levels are updated
  */
-internals.syncLoggers = function() {
+internals.syncLoggers = function () {
     _.forOwn(internals.loggers, (logger, namespace) => {
         internals.syncLogger(logger, namespace)
     })

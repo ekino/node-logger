@@ -13,7 +13,7 @@ exports.internals = internals
  * @param {number|string} number
  * @returns {string}
  */
-internals.twoDigitNumber = number => {
+internals.twoDigitNumber = (number) => {
     return `${number}`.length < 2 ? `0${number}` : `${number}`
 }
 
@@ -22,7 +22,7 @@ internals.twoDigitNumber = number => {
  * @param {Date} time
  * @returns {string}
  */
-internals.prettyTime = time => {
+internals.prettyTime = (time) => {
     const year = internals.twoDigitNumber(time.getFullYear())
     const month = internals.twoDigitNumber(time.getMonth() + 1)
     const day = internals.twoDigitNumber(time.getDate())
@@ -37,7 +37,7 @@ internals.prettyTime = time => {
  * Log with pretty output formater in stdout
  * @param {Log} log
  */
-exports.pretty = log => {
+exports.pretty = (log) => {
     const time = internals.prettyTime(log.time)
 
     const levelColorMap = {
@@ -45,7 +45,7 @@ exports.pretty = log => {
         warn: 'yellow',
         info: 'blue',
         debug: 'white',
-        trace: 'grey'
+        trace: 'grey',
     }
     const levelColor = levelColorMap[log.level] || 'red'
 
@@ -66,7 +66,7 @@ exports.pretty = log => {
  * Log in json to stdout
  * @param {Log} log
  */
-exports.json = log => {
+exports.json = (log) => {
     const output = Object.assign({
         level: log.level,
         time: log.time.toISOString(),
@@ -74,7 +74,7 @@ exports.json = log => {
         contextId: log.contextId,
         ...log.meta,
         message: log.message,
-        data: log.data
+        data: log.data,
     })
 
     const result = outputUtils.stringify(output)

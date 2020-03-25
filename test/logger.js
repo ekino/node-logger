@@ -6,11 +6,11 @@ const sinon = require('sinon')
 
 const logger = require('../index')
 
-test.beforeEach(t => {
+test.beforeEach((t) => {
     logger.setOutput([])
 })
 
-test('A logger instance should have levels function and isLevelEnabled function', t => {
+test('A logger instance should have levels function and isLevelEnabled function', (t) => {
     const log = logger.createLogger()
     t.is(typeof log.trace, 'function')
     t.is(typeof log.debug, 'function')
@@ -21,23 +21,29 @@ test('A logger instance should have levels function and isLevelEnabled function'
     t.is(typeof log.none, 'undefined')
 })
 
-test('A logger instance should only accept functions', t => {
-    const error = t.throws(() => {
-        logger.setOutput('invalid')
-    }, Error)
+test('A logger instance should only accept functions', (t) => {
+    const error = t.throws(
+        () => {
+            logger.setOutput('invalid')
+        },
+        { instanceOf: Error }
+    )
 
     t.is(error.message, `Invalid output: 'invalid'`)
 })
 
-test('A logger instance should only accept allowed levels', t => {
-    const error = t.throws(() => {
-        logger.setLevel('invalid')
-    }, Error)
+test('A logger instance should only accept allowed levels', (t) => {
+    const error = t.throws(
+        () => {
+            logger.setLevel('invalid')
+        },
+        { instanceOf: Error }
+    )
 
     t.is(error.message, `Invalid level: 'invalid'`)
 })
 
-test('A logger instance should log if level and namespace are enabled', t => {
+test('A logger instance should log if level and namespace are enabled', (t) => {
     logger.setNamespaces('*')
     logger.setLevel('info')
 
@@ -50,7 +56,7 @@ test('A logger instance should log if level and namespace are enabled', t => {
     logger.internals.write.restore()
 })
 
-test("A logger instance shouldn't log if level is lower than enabled level", t => {
+test("A logger instance shouldn't log if level is lower than enabled level", (t) => {
     logger.setNamespaces('*')
     logger.setLevel('info')
 
@@ -64,7 +70,7 @@ test("A logger instance shouldn't log if level is lower than enabled level", t =
     logger.internals.write.restore()
 })
 
-test("A logger instance shouldn't log if namespace is not enabled", t => {
+test("A logger instance shouldn't log if namespace is not enabled", (t) => {
     logger.setNamespaces('test:*')
 
     logger.setLevel('info')
@@ -79,7 +85,7 @@ test("A logger instance shouldn't log if namespace is not enabled", t => {
     logger.internals.write.restore()
 })
 
-test("A logger instance shouldn't log if log level is lower than namespace pattern level", t => {
+test("A logger instance shouldn't log if log level is lower than namespace pattern level", (t) => {
     logger.setNamespaces('test:*=error')
 
     logger.setLevel('info')
@@ -94,7 +100,7 @@ test("A logger instance shouldn't log if log level is lower than namespace patte
     logger.internals.write.restore()
 })
 
-test("A logger instance should log if log level is higher or equal than namespace pattern level", t => {
+test('A logger instance should log if log level is higher or equal than namespace pattern level', (t) => {
     logger.setNamespaces('test:*=debug')
 
     logger.setLevel('info')
@@ -108,7 +114,7 @@ test("A logger instance should log if log level is higher or equal than namespac
     logger.internals.write.restore()
 })
 
-test("A logger instance should log according to state defined in the latest matching namespace in the list", t => {
+test('A logger instance should log according to state defined in the latest matching namespace in the list', (t) => {
     logger.setNamespaces('test:*=warn,test2:*,test:*=error,test2:*=none')
 
     logger.setLevel('info')
@@ -124,7 +130,7 @@ test("A logger instance should log according to state defined in the latest matc
     logger.internals.write.restore()
 })
 
-test('A logger should call an output adapter with log data, metadata, message and data', t => {
+test('A logger should call an output adapter with log data, metadata, message and data', (t) => {
     logger.setNamespaces('test:*')
     logger.setLevel('info')
 
@@ -142,7 +148,6 @@ test('A logger should call an output adapter with log data, metadata, message an
 
     const outputArg = outputAdapter.firstCall.args[0]
 
-
     t.is(outputArg.namespace, 'test:subTest')
     t.is(outputArg.level, 'warn')
     t.is(outputArg.time.getTime(), now.getTime())
@@ -153,7 +158,7 @@ test('A logger should call an output adapter with log data, metadata, message an
     timersStub.restore()
 })
 
-test('A logger should call all output output adapters added', t => {
+test('A logger should call all output output adapters added', (t) => {
     logger.setNamespaces('test:*')
     logger.setLevel('info')
 
@@ -191,7 +196,7 @@ test('A logger should call all output output adapters added', t => {
     timersStub.restore()
 })
 
-test('A logger shoudn\'t throw an error if not outputs defined', t => {
+test("A logger shoudn't throw an error if not outputs defined", (t) => {
     logger.setNamespaces('test:*')
     logger.setLevel('info')
 
@@ -203,7 +208,7 @@ test('A logger shoudn\'t throw an error if not outputs defined', t => {
     t.true(true)
 })
 
-test('A logger should support defining a global context', t => {
+test('A logger should support defining a global context', (t) => {
     logger.setNamespaces('test:*')
     logger.setLevel('info')
     logger.setGlobalContext({ service: 'logger', mode: 'testing' })
@@ -233,7 +238,7 @@ test('A logger should support defining a global context', t => {
     timersStub.restore()
 })
 
-test('A logger contextId arg should be an an optional argument', t => {
+test('A logger contextId arg should be an an optional argument', (t) => {
     logger.setNamespaces('ns1:*')
     logger.setLevel('info')
 
@@ -260,7 +265,7 @@ test('A logger contextId arg should be an an optional argument', t => {
     timersStub.restore()
 })
 
-test("A logger should not log if it's namespace is disabled after call to setNamespaces", t => {
+test("A logger should not log if it's namespace is disabled after call to setNamespaces", (t) => {
     logger.setNamespaces('*')
     logger.setLevel('info')
 
@@ -277,7 +282,7 @@ test("A logger should not log if it's namespace is disabled after call to setNam
     logger.internals.write.restore()
 })
 
-test('A logger should not log if log level is not upper after call to setLevel', t => {
+test('A logger should not log if log level is not upper after call to setLevel', (t) => {
     logger.setNamespaces('*')
     logger.setLevel('info')
 
@@ -294,7 +299,7 @@ test('A logger should not log if log level is not upper after call to setLevel',
     logger.internals.write.restore()
 })
 
-test('A logger should not log if upper namespace was enabled, but sub namespace level was set to none', t => {
+test('A logger should not log if upper namespace was enabled, but sub namespace level was set to none', (t) => {
     logger.setNamespaces('ns1:*,ns1:subns1=none')
     logger.setLevel('info')
 
@@ -308,7 +313,7 @@ test('A logger should not log if upper namespace was enabled, but sub namespace 
     logger.internals.write.restore()
 })
 
-test('A logger should return true for a call to isLevelEnabled if level and namespace is enabled', t => {
+test('A logger should return true for a call to isLevelEnabled if level and namespace is enabled', (t) => {
     logger.setNamespaces('ns1:*,ns1:subns1=none')
     logger.setLevel('info')
 
@@ -316,7 +321,7 @@ test('A logger should return true for a call to isLevelEnabled if level and name
     t.true(log.isLevelEnabled('warn'))
 })
 
-test('A logger should return false for a call to isLevelEnabled if namespace level was set to none', t => {
+test('A logger should return false for a call to isLevelEnabled if namespace level was set to none', (t) => {
     logger.setNamespaces('ns1:*,ns1:subns1=none')
     logger.setLevel('info')
 
@@ -324,7 +329,7 @@ test('A logger should return false for a call to isLevelEnabled if namespace lev
     t.false(log.isLevelEnabled('warn'))
 })
 
-test('A logger should return true for a call to isLevelEnabled if top namespace is enabled but another subnamespace is set to none', t => {
+test('A logger should return true for a call to isLevelEnabled if top namespace is enabled but another subnamespace is set to none', (t) => {
     logger.setNamespaces('ns1:*,ns1:subns1=none')
     logger.setLevel('error')
 
@@ -332,7 +337,7 @@ test('A logger should return true for a call to isLevelEnabled if top namespace 
     t.false(log.isLevelEnabled('warn'))
 })
 
-test('loggers should be equal if they are for the same namespace', t => {
+test('loggers should be equal if they are for the same namespace', (t) => {
     logger.setNamespaces('ns1:*,ns1:subns1=none')
     logger.setLevel('error')
 
@@ -341,22 +346,22 @@ test('loggers should be equal if they are for the same namespace', t => {
     t.is(log1, log2)
 })
 
-test('parseNamespace should return a namespace if there is no level', t => {
+test('parseNamespace should return a namespace if there is no level', (t) => {
     const result = logger.internals.parseNamespace('test:*')
-    t.deepEqual(result, { regex:/^test:.*?$/ })
+    t.deepEqual(result, { regex: /^test:.*?$/ })
 })
 
-test('parseNamespace should return a namespace and a level', t => {
+test('parseNamespace should return a namespace and a level', (t) => {
     const result = logger.internals.parseNamespace('test:*=info')
-    t.deepEqual(result, { regex:/^test:.*?$/, level: 2 })
+    t.deepEqual(result, { regex: /^test:.*?$/, level: 2 })
 })
 
-test('parseNamespace should return null if namespace is missing', t => {
+test('parseNamespace should return null if namespace is missing', (t) => {
     const result = logger.internals.parseNamespace('=info')
     t.deepEqual(result, null)
 })
 
-test('parseNamespace should return null if namespace is empty', t => {
+test('parseNamespace should return null if namespace is empty', (t) => {
     const result = logger.internals.parseNamespace('')
     t.deepEqual(result, null)
 })

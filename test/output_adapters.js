@@ -10,16 +10,16 @@ const logger = require('../index')
 
 const stdoutWrite = process.stdout.write
 
-test.beforeEach(t => {
+test.beforeEach((t) => {
     process.stdout.write = () => {}
     logger.setOutput([])
 })
 
-test.afterEach(t => {
+test.afterEach((t) => {
     process.stdout.write = stdoutWrite
 })
 
-test('JSON Output adapter should write a Json Object with expected data and an \\n to stdout if enabled', t => {
+test('JSON Output adapter should write a Json Object with expected data and an \\n to stdout if enabled', (t) => {
     const now = new Date()
 
     const spy = sinon.spy(process.stdout, 'write')
@@ -31,7 +31,7 @@ test('JSON Output adapter should write a Json Object with expected data and an \
         contextId: 'ctxId',
         meta: { field1: 'value1' },
         message: 'test',
-        data: { someData: 'someValue' }
+        data: { someData: 'someValue' },
     }
 
     outputAdapters.json(_.cloneDeep(log))
@@ -53,7 +53,7 @@ test('JSON Output adapter should write a Json Object with expected data and an \
     process.stdout.write.restore()
 })
 
-test('JSON Output Adpater should work if used by logger', t => {
+test('JSON Output Adpater should work if used by logger', (t) => {
     const now = new Date()
 
     logger.setNamespaces('test:*')
@@ -84,8 +84,7 @@ test('JSON Output Adpater should work if used by logger', t => {
     timersStub.restore()
 })
 
-
-test('pretty output adapter should write yaml like data and an \\n to stdout if enabled', t => {
+test('pretty output adapter should write yaml like data and an \\n to stdout if enabled', (t) => {
     const spy = sinon.spy(process.stdout, 'write')
 
     const log = {
@@ -95,7 +94,7 @@ test('pretty output adapter should write yaml like data and an \\n to stdout if 
         contextId: 'ctxId',
         meta: { field1: 'value1' },
         message: 'test',
-        data: { someData: 'someValue' }
+        data: { someData: 'someValue' },
     }
 
     outputAdapters.pretty(_.cloneDeep(log))
@@ -118,7 +117,7 @@ test('pretty output adapter should write yaml like data and an \\n to stdout if 
     process.stdout.write.restore()
 })
 
-test('pretty output adapter should work if used by logger', t => {
+test('pretty output adapter should work if used by logger', (t) => {
     logger.setNamespaces('test:*')
     logger.setLevel('info')
     logger.setOutput(outputAdapters.pretty)
@@ -134,7 +133,7 @@ test('pretty output adapter should work if used by logger', t => {
     const firstCall = spy.firstCall.args[0]
     const secondCall = spy.secondCall.args[0]
 
-    let expected =  `${outputAdapters.internals.prettyTime(new Date(1547205226232))} (test:subTest) [warn] : \u001b[33mtest\u001b[39m\n`
+    let expected = `${outputAdapters.internals.prettyTime(new Date(1547205226232))} (test:subTest) [warn] : \u001b[33mtest\u001b[39m\n`
     expected += '\u001b[32m  contextId: \u001b[39mctxId\n'
     expected += '\u001b[32m  data: \u001b[39m\n'
     expected += '\u001b[32m    someData: \u001b[39msomeValue\n'

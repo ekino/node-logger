@@ -24,7 +24,7 @@ internals.newCircularReplacer = () => {
  * @param {*} log - json object
  * @returns {string} - stringified log or error log if can not stringify
  */
-exports.stringify = log => {
+exports.stringify = (log) => {
     const backup = Error.prototype.toJSON
     Error.prototype.toJSON = internals.errorToJson
     let result = ''
@@ -42,10 +42,10 @@ exports.stringify = log => {
  * Used to override error toJSON function to customize output
  * @return {object}
  */
-internals.errorToJson = function() {
+internals.errorToJson = function () {
     const result = {}
 
-    Object.getOwnPropertyNames(this).forEach(function(key) {
+    Object.getOwnPropertyNames(this).forEach(function (key) {
         result[key] = this[key]
     }, this)
 

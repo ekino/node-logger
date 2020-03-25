@@ -7,32 +7,31 @@
 
 A Lightweight logger that combines debug namespacing capabilities with winston levels and multioutput
 
-- [@ekino/logger](#ekinologger)
-  - [Installation](#installation)
-  - [Usage](#usage)
-    - [Using context ID](#using-context-id)
-    - [Using namespaces](#using-namespaces)
-      - [Using Logging Namespaces](#using-logging-namespaces)
-    - [Outputs](#outputs)
-      - [JSON](#json)
-      - [Pretty](#pretty)
-      - [Output function](#output-function)
-      - [JSON Stringify utility](#json-stringify-utility)
-    - [Log data](#log-data)
-      - [Adding global metadata](#adding-global-metadata)
-  - [TypeScript](#typescript)
+-   [Installation](#installation)
+-   [Usage](#usage)
+    -   [Using context ID](#using-context-id)
+    -   [Using namespaces](#using-namespaces)
+        -   [Using Logging Namespaces](#using-logging-namespaces)
+    -   [Outputs](#outputs)
+        -   [JSON](#json)
+        -   [Pretty](#pretty)
+        -   [Output function](#output-function)
+        -   [JSON Stringify utility](#json-stringify-utility)
+    -   [Log data](#log-data)
+        -   [Adding global metadata](#adding-global-metadata)
+-   [TypeScript](#typescript)
 
 ## Installation
 
 Using npm:
 
-``` sh
+```sh
 npm install @ekino/logger
 ```
 
 Or yarn:
 
-``` sh
+```sh
 yarn add @ekino/logger
 ```
 
@@ -48,12 +47,12 @@ A log instance is bounded to a namespace. To use it, instantiate a logger with a
 
 This logger define 5 log levels: error, warn, info, debug, trace.
 When you set a level, all levels above it are enabled too.
-Log level can be set by calling `setLevel` function. 
+Log level can be set by calling `setLevel` function.
 
 For example, enabling `info` will enable `info`, `warn` and `error` but not `debug` or `trace`.
 The "special" log level `none` means no log and can only be used to set a namespace level.
 
-``` js
+```js
 { trace: 0, debug: 1, info: 2, warn: 3, error: 4 }
 ```
 
@@ -77,7 +76,7 @@ logger.debug('sample message', {
 })
 ```
 
-output: 
+output:
 
 ![Example](docs/images/example_usage1.gif)
 
@@ -87,7 +86,7 @@ One of the main complexity working with node is ability to follow all logs attac
 This is not mandatory, but based on our experience, we recommend as a best practice to add a unique identifier that will be passed all along functions calls.
 When you log something, you can provide this id as a first parameter and logger will log it. If not provided, it's auto generated.
 
-The signature of the function with contextId is: 
+The signature of the function with contextId is:
 
 ```js
 my_log.the_level(contextId, message, data)
@@ -95,7 +94,7 @@ my_log.the_level(contextId, message, data)
 
 Example app.js
 
-``` javascript
+```javascript
 const { setNamespaces, setLevel, createLogger } = require('@ekino/logger')
 
 setNamespaces('root:*')
@@ -107,7 +106,7 @@ logger.debug('ctxId', 'log with predefined context ID', {
 })
 ```
 
-output: 
+output:
 
 ![Example](docs/images/example_usage2.gif)
 
@@ -115,17 +114,17 @@ output:
 
 Logger relies on namespaces. When you want to log something, you should define a namespace that is bound to it.
 When you debug, this gives you the flexibility to enable only the namespaces you need to output.
-As a good practice, we recommend setting a namespace by folder / file. 
+As a good practice, we recommend setting a namespace by folder / file.
 For example for a file in modules/login/dao you could define 'modules:login:dao'.
 Warning, "=" can't be part of the namespace as it's a reserved symbol.
 
 You can also define a level per namespace. If no level is defined, the default global level is used.
 To disable logs of a namespace, you can specify a level `none`
-A namespace ':*' means eveything after ':' will be enabled. Namespaces are parsed as regexp.
+A namespace ':\*' means eveything after ':' will be enabled. Namespaces are parsed as regexp.
 
-To define namespace level, you should suffix namespace with "=the_level" 
-For example let's say you need to enable all info logs but for debug purpose you need to lower the level 
-of the namespace database to `debug`. You could then use: 
+To define namespace level, you should suffix namespace with "=the_level"
+For example let's say you need to enable all info logs but for debug purpose you need to lower the level
+of the namespace database to `debug`. You could then use:
 
 ```js
 const { setLevel, setNamespaces } = require('@ekino/logger')
@@ -181,11 +180,11 @@ setOutput(outputs.json)
 const logger = createLogger('namespace:subNamespace')
 logger.debug('ctxId', 'Will be logged', {
     someData: 'someValue',
-    someData2: 'someValue'
+    someData2: 'someValue',
 })
 ```
 
-output: 
+output:
 
 ![Example](docs/images/example_usage3.gif)
 
@@ -195,7 +194,7 @@ Pretty will output a yaml like content.
 
 ```js
 const { setNamespaces, setLevel, setOutput, outputs, createLogger } = require('@ekino/logger')
-    
+
 setNamespaces('namespace:*')
 setLevel('debug')
 setOutput(outputs.pretty)
@@ -203,11 +202,11 @@ setOutput(outputs.pretty)
 const logger = createLogger('namespace:subNamespace')
 logger.debug('ctxId', 'Will be logged', {
     someData: 'someValue',
-    someData2: 'someValue'
+    someData2: 'someValue',
 })
 ```
 
-output: 
+output:
 
 ![Example](docs/images/example_pretty.gif)
 
@@ -215,7 +214,7 @@ output:
 
 An output, is a function that will receive log data and should transform and store it
 
-Log data follow the format: 
+Log data follow the format:
 
 ```
 {
@@ -231,7 +230,7 @@ Log data follow the format:
 
 ```js
 const { setNamespaces, setLevel, setOutput, outputs, outputUtils, createLogger } = require('@ekino/logger')
-    
+
 setNamespaces('namespace:*')
 setLevel('debug')
 
@@ -239,14 +238,14 @@ const consoleAdapter = (log) => {
     console.log(outputUtils.stringify(log))
 }
 
-// This will output in stdout with the pretty output 
+// This will output in stdout with the pretty output
 // and in the same will log through native console.log() function (usually to stdout too)
 setOutput([outputs.pretty, consoleAdapter])
 
 const logger = createLogger('namespace:subNamespace')
 logger.debug('ctxId', 'Will be logged', {
     someData: 'someValue',
-    someData2: 'someValue'
+    someData2: 'someValue',
 })
 ```
 
@@ -266,12 +265,12 @@ const consoleAdapter = (log) => {
 ### Log data
 
 Most of the time, a log message is not enough to guess context.
-You can append arbitrary data to your logs. 
+You can append arbitrary data to your logs.
 If you're using some kind of log collector, you'll then be able to extract those values and inject them in elasticsearch for example.
 
 ```js
 const { setOutput, setNamespaces, setLevel, createLogger } = require('@ekino/logger')
-    
+
 setOutput('pretty')
 setNamespaces('namespace:*')
 setLevel('info')
@@ -280,7 +279,7 @@ const logger = createLogger('namespace:subNamespace')
 logger.warn('message', { someData: 'someValue' })
 ```
 
-output: 
+output:
 
 ![Example](docs/images/example_data.gif)
 
@@ -301,7 +300,7 @@ const logger = createLogger('namespace')
 logger.warn('message', { someData: 'someValue' })
 ```
 
-output: 
+output:
 
 ![Example](docs/images/example_context.gif)
 

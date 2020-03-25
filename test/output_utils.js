@@ -1,7 +1,7 @@
 const test = require('ava')
 const outputUtils = require('../output_utils')
 
-test('errorToJson should expose error stack through a json stringify', t => {
+test('errorToJson should expose error stack through a json stringify', (t) => {
     const backup = Error.prototype.toJSON
     Error.prototype.toJSON = outputUtils.internals.errorToJson
     const e = new Error()
@@ -12,10 +12,10 @@ test('errorToJson should expose error stack through a json stringify', t => {
     t.is(parsed.stack, e.stack)
 })
 
-test('stringify should work even with circular references', t => {
+test('stringify should work even with circular references', (t) => {
     const obj = {
-        a: "1",
-        b: "2"
+        a: '1',
+        b: '2',
     }
     obj.d = obj
 
