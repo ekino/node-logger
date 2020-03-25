@@ -7,20 +7,19 @@
 
 A Lightweight logger that combines debug namespacing capabilities with winston levels and multioutput
 
-- [@ekino/logger](#ekinologger)
-  - [Installation](#installation)
-  - [Usage](#usage)
-    - [Using context ID](#using-context-id)
-    - [Using namespaces](#using-namespaces)
-      - [Using Logging Namespaces](#using-logging-namespaces)
-    - [Outputs](#outputs)
-      - [JSON](#json)
-      - [Pretty](#pretty)
-      - [Output function](#output-function)
-      - [JSON Stringify utility](#json-stringify-utility)
-    - [Log data](#log-data)
-      - [Adding global metadata](#adding-global-metadata)
-  - [TypeScript](#typescript)
+-   [Installation](#installation)
+-   [Usage](#usage)
+    -   [Using context ID](#using-context-id)
+    -   [Using namespaces](#using-namespaces)
+        -   [Using Logging Namespaces](#using-logging-namespaces)
+    -   [Outputs](#outputs)
+        -   [JSON](#json)
+        -   [Pretty](#pretty)
+        -   [Output function](#output-function)
+        -   [JSON Stringify utility](#json-stringify-utility)
+    -   [Log data](#log-data)
+        -   [Adding global metadata](#adding-global-metadata)
+-   [TypeScript](#typescript)
 
 ## Installation
 
