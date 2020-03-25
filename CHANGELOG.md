@@ -1,3 +1,11 @@
+## [1.0.0](https://github.com/ekino/node-logger/compare/v0.3.0...v1.0.0) (2020-03-25)
+
+
+### Features
+
+* **doc:** add missing documentation about log level env ([f071ca4](https://github.com/ekino/node-logger/commit/f071ca4ec160350f25c5dff4dec044d92c77d47e))
+* **logLevel:** override default log level with env variable ([5d207f4](https://github.com/ekino/node-logger/commit/5d207f4aa4ae2da220137a1753ea9967b2ce12d3))
+
 ## [0.3.0](https://github.com/ekino/node-logger/compare/v0.2.0...v0.3.0) (2019-12-18)
 
 
