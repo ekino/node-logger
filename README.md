@@ -7,13 +7,20 @@
 
 A Lightweight logger that combines debug namespacing capabilities with winston levels and multioutput
 
--   [Installation](#installation)
--   [Usage](#usage)
-    -   [Using context ID](#using-context-id)
-    -   [Using namespaces](#using-namespaces)
-    -   [Outputs](#outputs)
-    -   [Metadata](#metadata)
--   [TypeScript](#typescript)
+- [@ekino/logger](#ekinologger)
+  - [Installation](#installation)
+  - [Usage](#usage)
+    - [Using context ID](#using-context-id)
+    - [Using namespaces](#using-namespaces)
+      - [Using Logging Namespaces](#using-logging-namespaces)
+    - [Outputs](#outputs)
+      - [JSON](#json)
+      - [Pretty](#pretty)
+      - [Output function](#output-function)
+      - [JSON Stringify utility](#json-stringify-utility)
+    - [Log data](#log-data)
+      - [Adding global metadata](#adding-global-metadata)
+  - [TypeScript](#typescript)
 
 ## Installation
 
@@ -32,6 +39,7 @@ yarn add @ekino/logger
 ## Usage
 
 By default, the logger output warn and error levels for all namespaces.
+You can set LOG_LEVEL environment to override the default behavior.
 By default, it writes logs to stdout in JSON format
 
 The logger api allows you to set log level for all namespaces. For advanced usage, you define it even per namespace.
