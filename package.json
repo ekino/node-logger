@@ -1,59 +1,59 @@
 {
-  "name": "@ekino/logger",
-  "description": "A Lightweight logger that combines debug namespacing capabilities with winston levels and multioutput",
-  "homepage": "https://github.com/ekino/node-logger",
-  "main": "index.js",
-  "types": "index.d.ts",
-  "tags": [
-    "logger",
-    "lightweight",
-    "namespaces"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ekino/node-logger.git"
-  },
-  "maintainers": [
-    {
-      "name": "Raphaël Benitte"
+    "name": "@ekino/logger",
+    "description": "A Lightweight logger that combines debug namespacing capabilities with winston levels and multioutput",
+    "homepage": "https://github.com/ekino/node-logger",
+    "main": "index.js",
+    "types": "index.d.ts",
+    "tags": [
+        "logger",
+        "lightweight",
+        "namespaces"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ekino/node-logger.git"
     },
-    {
-      "name": "Nadim El-Boustani"
+    "maintainers": [
+        {
+            "name": "Raphaël Benitte"
+        },
+        {
+            "name": "Nadim El-Boustani"
+        }
+    ],
+    "license": "MIT",
+    "version": "0.3.0",
+    "engines": {
+        "node": ">=10.18.0"
+    },
+    "dependencies": {
+        "colors": "1.x",
+        "lodash": "4.x",
+        "prettyoutput": "1.x",
+        "uuid": "7.x"
+    },
+    "devDependencies": {
+        "@commitlint/config-conventional": "8.x",
+        "ava": "3.x",
+        "commitlint": "8.x",
+        "conventional-changelog-cli": "2.x",
+        "coveralls": "3.x",
+        "eslint": "6.x",
+        "husky": "4.x",
+        "nyc": "15.x",
+        "prettier": "2.x",
+        "sinon": "9.x",
+        "typescript": "3.x"
+    },
+    "scripts": {
+        "fmt": "prettier --color --write \"{*,test/**/*}.{js,ts}\"",
+        "check-fmt": "prettier --list-different \"{*,test/**/*}.{js,ts}\"",
+        "tsc": "tsc",
+        "test": "ava",
+        "test-cover": "nyc ava",
+        "coverage": "nyc report --reporter=text-lcov | coveralls",
+        "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s -r 0",
+        "version": "echo ${npm_package_version}",
+        "lint": "eslint ."
     }
-  ],
-  "license": "MIT",
-  "version": "0.3.0",
-  "engines": {
-    "node": ">=8.9.4"
-  },
-  "dependencies": {
-    "colors": "1.x",
-    "lodash": "4.x",
-    "prettyoutput": "1.x",
-    "uuid": "3.x"
-  },
-  "devDependencies": {
-    "@commitlint/config-conventional": "8.x",
-    "ava": "2.x",
-    "commitlint": "8.x",
-    "conventional-changelog-cli": "2.x",
-    "coveralls": "3.x",
-    "eslint": "6.x",
-    "husky": "3.x",
-    "nyc": "14.x",
-    "prettier": "1.x",
-    "sinon": "7.x",
-    "typescript": "3.x"
-  },
-  "scripts": {
-    "fmt": "prettier --color --write \"{.,{test}/**/}/*.{js,ts}\"",
-    "check-fmt": "prettier --list-different \"{.,{test}/**/}/*.{js,ts}\"",
-    "tsc": "tsc",
-    "test": "ava",
-    "test-cover": "nyc ava",
-    "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s -r 0",
-    "version": "echo ${npm_package_version}",
-    "lint": "eslint ."
-  }
 }
