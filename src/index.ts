@@ -1,11 +1,11 @@
-'use strict'
-const _ = require('lodash')
-const uuid = require('uuid')
+import _ from 'lodash'
+import { v4 as uuidv4 } from 'uuid'
+import { Internal, Logger, LogLevel, LogMethod, LogInstance, NameSpaceConfig, Output, OutputAdapter } from './definitions'
 
-const outputAdapters = require('./output_adapters')
-const outputUtils = require('./output_utils')
+import * as outputAdapters from './output_adapters'
+import * as outputUtils from './output_utils'
 
-const internals = {}
+const internals: Internal = {}
 
 /**
  * @typedef {Function} LoggerLogFunction
@@ -31,7 +31,7 @@ const internals = {}
  */
 
 /**
- * @typedef {object} Log
+ * @typedef {object} LogInstance
  * @property {string} level       - log level (debug, info, warn, error)
  * @property {Date} time          - log time
  * @property {string} namespace   - log namespace
@@ -43,7 +43,7 @@ const internals = {}
 
 /**
  * @typedef {Function} OutputAdapter
- * @param {Log} log to write
+ * @param {LogInstance} logInstance to write
  */
 
 /**
@@ -58,46 +58,45 @@ const internals = {}
  * @param {String} [namespace]
  * @return {Logger}
  */
-module.exports.createLogger = function (namespace) {
+export const createLogger = (namespace?: string): Logger => {
     namespace = namespace || ''
 
-    let logger = internals.loggers[namespace]
+    let logger = internals.loggers?.[namespace]
     if (logger) return logger
 
-    logger = internals.syncLogger({}, namespace)
-    internals.loggers[namespace] = logger
+    logger = syncLogger({} as Logger, namespace)
+    if (internals.loggers) internals.loggers[namespace] = logger
 
     return logger
 }
 
 /**
  * Define enabled / disabled namespaces
- * @param {string} namespaces
+ * @param {string} namespace
  */
-module.exports.setNamespaces = function (namespaces) {
-    exports.namespaces = namespaces
+export const setNamespaces = (namespace: string): void => {
     internals.namespaces = []
 
-    if (_.isEmpty(namespaces)) return internals.syncLoggers()
+    if (_.isEmpty(namespace)) return syncLoggers()
 
-    namespaces = namespaces.replace(/\s/g, '').split(',')
+    const splitNamespaces = namespace.replace(/\s/g, '').split(',')
 
-    namespaces.forEach((namespace) => {
-        const parsedNamespace = internals.parseNamespace(namespace)
-        if (!parsedNamespace) return true
+    splitNamespaces.forEach((name) => {
+        const parsedNamespace = parseNamespace(name)
+        if (!parsedNamespace) return
 
-        internals.namespaces.push(parsedNamespace)
+        internals.namespaces?.push(parsedNamespace)
     })
 
-    internals.syncLoggers()
+    syncLoggers()
 }
 
 /**
  * Change log level
  * @param {string} level - one of trace, debug, info, warn, error
  */
-module.exports.setLevel = function (level) {
-    if (!internals.levels.includes(level)) {
+export const setLevel = (level: LogLevel): void => {
+    if (!internals.levels?.includes(level)) {
         throw new Error(`Invalid level: '${level}'`)
     }
 
@@ -107,14 +106,14 @@ module.exports.setLevel = function (level) {
     // internally store corresponding level index
     internals.level = internals.levels.indexOf(level)
 
-    internals.syncLoggers()
+    syncLoggers()
 }
 
 /**
  * Set outputs transport to use
  * @param {Array<OutputAdapter>|OutputAdapter} outputs
  */
-module.exports.setOutput = module.exports.setOutputs = function (outputs) {
+export const setOutput = (outputs?: OutputAdapter[] | OutputAdapter): void => {
     if (!outputs) outputs = []
     if (!Array.isArray(outputs)) outputs = [outputs]
 
@@ -132,7 +131,7 @@ module.exports.setOutput = module.exports.setOutputs = function (outputs) {
  * even those from third party libraries if they use this module.
  * @param {Object} context - The object holding default context data
  */
-module.exports.setGlobalContext = function (context) {
+export const setGlobalContext = (context: unknown): void => {
     internals.globalContext = context
 }
 
@@ -141,22 +140,9 @@ module.exports.setGlobalContext = function (context) {
  * Return an id that can be used as a contextId
  * @return {string}
  */
-module.exports.id = () => {
-    return uuid.v4()
+export const id = (): string => {
+    return uuidv4()
 }
-
-// Expose raw namespaces config,
-// parsed ones are kept in `internals.namespaces`.
-module.exports.namespaces = ''
-
-// Expose raw level config,
-// index value is kept in the internal code
-module.exports.level = undefined
-
-module.exports.outputs = outputAdapters
-module.exports.outputUtils = outputUtils
-
-module.exports.internals = internals
 
 /************* INTERNALS *************/
 internals.loggers = {}
@@ -175,7 +161,7 @@ internals.level = undefined
 
 /**
  * Internally store parsed namespaces,
- * `module.exports.namespaces` contains raw config.
+ * `exports.namespaces` contains raw config.
  *
  * @type {Array<NamespaceConfig>}
  */
@@ -188,11 +174,11 @@ internals.globalContext = {}
  * @param {string} namespace
  * @return {NamespaceConfig|null}
  */
-internals.parseNamespace = function (namespace) {
+export const parseNamespace = (namespace: string): NameSpaceConfig | null => {
     const matches = /([^=]*)(=(.*))?/.exec(namespace)
     if (!matches) return null
 
-    let level = null
+    let level
     if (matches[3]) {
         const idx = _.indexOf(internals.levels, matches[3])
         if (idx < 0) throw new Error(`Level ${matches[3]} is not a valid log level : ${internals.levels}`)
@@ -200,13 +186,14 @@ internals.parseNamespace = function (namespace) {
     }
 
     let pattern = matches[1]
-    if (_.isEmpty(pattern)) return null
+    if (!pattern || _.isEmpty(pattern)) return null
 
     pattern = pattern.replace(/\*/g, '.*?')
     const regex = new RegExp(`^${pattern}$`)
 
-    const namespaceConfig = { regex }
+    const namespaceConfig: NameSpaceConfig = { regex }
     if (level) namespaceConfig.level = level
+
     return namespaceConfig
 }
 
@@ -218,29 +205,30 @@ internals.parseNamespace = function (namespace) {
  * @param {String} message
  * @param {Object} [data] - An object holding data to help understand the error
  */
-internals.log = function (namespace, level, contextId, message, data) {
+export const log = (namespace: string, level: LogLevel, contextId?: string | null, message?: string | null, data?: unknown): void => {
     if (typeof message !== 'string') {
         data = message
         message = contextId
         contextId = null
     }
 
-    contextId = contextId || module.exports.id()
+    contextId = contextId || id()
     const time = new Date()
-    const log = { level, time, namespace, contextId }
-    log.meta = Object.assign({}, internals.globalContext)
-    if (message) log.message = message
-    if (data) log.data = data
-    internals.write(log)
+    const logInstance: LogInstance = { level, time, namespace, contextId }
+    logInstance.meta = Object.assign({}, internals.globalContext)
+    if (message) logInstance.message = message
+    if (data) logInstance.data = data
+
+    write(logInstance)
 }
 
 /**
  * Write log using output adapter
- * @param {Log} log
+ * @param {LogInstance} logInstance
  */
-internals.write = function (log) {
-    internals.outputs.forEach((outputFn) => {
-        outputFn(log)
+export const write = (logInstance: LogInstance): void => {
+    internals.outputs?.forEach((outputFn) => {
+        outputFn(logInstance)
     })
 }
 
@@ -250,12 +238,12 @@ internals.write = function (log) {
  * @param {String} level
  * @return {Boolean} true if enabled
  */
-internals.isEnabled = function (namespace, level) {
-    let nsLevel = internals.level
+internals.isEnabled = (namespace, level): boolean => {
+    let nsLevel = internals.level || 0
     let nsMatch = false
 
     _.forEachRight(internals.namespaces, (ns) => {
-        if (ns.regex.test(namespace)) {
+        if (ns.regex?.test(namespace)) {
             nsMatch = true
             if (ns.level) {
                 nsLevel = ns.level
@@ -268,11 +256,6 @@ internals.isEnabled = function (namespace, level) {
 }
 
 /**
- * A noop function to be used for disabled loggers.
- */
-internals.noop = () => {}
-
-/**
  * Remove all properties but levels.
  * Levels contains a function that does nothing if namespace or level is disable.
  * If enabled, calls log function.
@@ -280,26 +263,31 @@ internals.noop = () => {}
  * @param {String} namespace
  * @return {Logger}
  */
-internals.syncLogger = function (logger, namespace) {
-    _.forOwn(logger, (value, key) => {
+export const syncLogger = (logger: Logger, namespace: string): Logger => {
+    _.forOwn(logger, (value, key: keyof Logger) => {
         delete logger[key]
     })
 
-    const enabledLevels = {}
-    internals.levels.forEach((level, idx) => {
-        if (level === 'none') return
-        if (!internals.isEnabled(namespace, idx)) {
-            enabledLevels[level] = false
-            logger[level] = internals.noop
-        } else {
-            enabledLevels[level] = true
-            logger[level] = function (contextId, message, data) {
-                internals.log(namespace, level, contextId, message, data)
-            }
-        }
-    })
+    const enabledLevels: Record<string, boolean> = {}
+    if (internals.levels) {
+        internals.levels.forEach((level, idx) => {
+            if (level === 'none') return
+            if (!internals.isEnabled?.(namespace, idx)) {
+                enabledLevels[level] = false
+                logger[level] = () => {}
+            } else {
+                enabledLevels[level] = true
 
-    logger.isLevelEnabled = (level) => enabledLevels[level]
+                // @TODO: to fix this, try to make optional method in LogMethod interface
+                // @ts-ignore
+                logger[level] = (contextId: string, message: string, data?: unknown) => {
+                    log(namespace, level, contextId, message, data)
+                }
+            }
+        })
+
+        logger.isLevelEnabled = (level) => enabledLevels[level]
+    }
 
     return logger
 }
@@ -308,15 +296,18 @@ internals.syncLogger = function (logger, namespace) {
  * Resync all loggers level functions to enable / disable them
  * This should be called when namespaces or levels are updated
  */
-internals.syncLoggers = function () {
+export const syncLoggers = () => {
     _.forOwn(internals.loggers, (logger, namespace) => {
-        internals.syncLogger(logger, namespace)
+        syncLogger(logger, namespace)
     })
 }
 
 /************* INIT *************/
 const namespaces = process.env.LOGS || '*'
-const logLevel = process.env.LOG_LEVEL || 'warn'
+const logLevel: LogLevel = (process.env.LOG_LEVEL as LogLevel) || 'warn'
 
-module.exports.setNamespaces(namespaces)
-module.exports.setLevel(logLevel)
+setNamespaces(namespaces)
+setLevel(logLevel)
+
+export { internals, outputAdapters as outputs, setOutput as setOutputs }
+export { outputAdapters, outputUtils }

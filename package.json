@@ -2,8 +2,8 @@
     "name": "@ekino/logger",
     "description": "A Lightweight logger that combines debug namespacing capabilities with winston levels and multioutput",
     "homepage": "https://github.com/ekino/node-logger",
-    "main": "index.js",
-    "types": "index.d.ts",
+    "main": "build/index.js",
+    "types": "build/index.d.ts",
     "tags": [
         "logger",
         "lightweight",
@@ -29,29 +29,32 @@
     "dependencies": {
         "colors": "1.x",
         "lodash": "4.x",
+        "pretty-format": "27.x",
         "prettyoutput": "1.x",
-        "uuid": "7.x"
+        "uuid": "8.x"
     },
     "devDependencies": {
         "@commitlint/config-conventional": "8.x",
-        "ava": "3.x",
+        "@types/jest": "27.x",
+        "@types/lodash": "4.x",
+        "@types/uuid": "8.x",
         "commitlint": "8.x",
         "conventional-changelog-cli": "2.x",
         "coveralls": "3.x",
         "eslint": "6.x",
         "husky": "4.x",
-        "nyc": "15.x",
+        "jest": "27.x",
         "prettier": "2.x",
-        "sinon": "9.x",
-        "typescript": "3.x"
+        "ts-jest": "27.x",
+        "typescript": "4.x"
     },
     "scripts": {
-        "fmt": "prettier --color --write \"{*,test/**/*}.{js,ts}\"",
+        "fmt": "prettier --color --write \"{*,test/**/*,src/**/*,examples/**/*}.{js,ts}\"",
         "check-fmt": "prettier --list-different \"{*,test/**/*}.{js,ts}\"",
-        "tsc": "tsc",
-        "test": "ava",
-        "test-cover": "nyc ava",
-        "coverage": "nyc report --reporter=text-lcov | coveralls",
+        "tsc": "tsc -d",
+        "test": "jest",
+        "test-cover": "jest --coverage",
+        "coverage": "jest --coverage --coverageReporters=text-lcov | coveralls",
         "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s -r 0",
         "version": "echo ${npm_package_version}",
         "lint": "eslint ."
