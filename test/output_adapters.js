@@ -3,10 +3,9 @@
 
 const test = require('ava')
 const sinon = require('sinon')
-const _ = require('lodash')
 
-const outputAdapters = require('../output_adapters')
-const logger = require('../index')
+const outputAdapters = require('../src/output_adapters.ts')
+const logger = require('../src/index.ts')
 
 const stdoutWrite = process.stdout.write
 
@@ -34,7 +33,7 @@ test('JSON Output adapter should write a Json Object with expected data and an \
         data: { someData: 'someValue' },
     }
 
-    outputAdapters.json(_.cloneDeep(log))
+    outputAdapters.json({ ...log })
 
     t.true(spy.calledTwice)
     const firstCall = spy.firstCall.args[0]
@@ -97,14 +96,14 @@ test('pretty output adapter should write yaml like data and an \\n to stdout if 
         data: { someData: 'someValue' },
     }
 
-    outputAdapters.pretty(_.cloneDeep(log))
+    outputAdapters.pretty({ ...log })
 
     t.true(spy.calledTwice)
 
     const firstCall = spy.firstCall.args[0]
     const secondCall = spy.secondCall.args[0]
 
-    let expected = `${outputAdapters.internals.prettyTime(log.time)} (test1) [warn] : \u001b[33mtest\u001b[39m\n`
+    let expected = `${outputAdapters.prettyTime(log.time)} (test1) [warn] : \u001b[33mtest\u001b[39m\n`
     expected += '\u001b[32m  contextId: \u001b[39mctxId\n'
     expected += '\u001b[32m  meta: \u001b[39m\n'
     expected += '\u001b[32m    field1: \u001b[39mvalue1\n'
@@ -134,8 +133,9 @@ test('pretty output adapter should work if used by logger', (t) => {
     const firstCall = spy.firstCall.args[0]
     const secondCall = spy.secondCall.args[0]
 
-    let expected = `${outputAdapters.internals.prettyTime(new Date(1547205226232))} (test:subTest) [warn] : \u001b[33mtest\u001b[39m\n`
+    let expected = `${outputAdapters.prettyTime(new Date(1547205226232))} (test:subTest) [warn] : \u001b[33mtest\u001b[39m\n`
     expected += '\u001b[32m  contextId: \u001b[39mctxId\n'
+    expected += '\u001b[32m  meta: \u001b[39m\n'
     expected += '\u001b[32m  data: \u001b[39m\n'
     expected += '\u001b[32m    someData: \u001b[39msomeValue\n'
 

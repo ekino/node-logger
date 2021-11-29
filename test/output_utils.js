@@ -1,14 +1,9 @@
 const test = require('ava')
-const outputUtils = require('../output_utils')
+const { errorToJson, stringify } = require('../src/output_utils.ts')
 
 test('errorToJson should expose error stack through a json stringify', (t) => {
-    const backup = Error.prototype.toJSON
-    Error.prototype.toJSON = outputUtils.internals.errorToJson
     const e = new Error()
-    const result = JSON.stringify(e)
-    Error.prototype.toJSON = backup
-
-    const parsed = JSON.parse(result)
+    const parsed = errorToJson(e)
     t.is(parsed.stack, e.stack)
 })
 
@@ -19,7 +14,7 @@ test('stringify should work even with circular references', (t) => {
     }
     obj.d = obj
 
-    t.notThrows(() => outputUtils.stringify(obj))
-    const value = outputUtils.stringify(obj)
-    t.is(value, '{"a":"1","b":"2","d":"[Circular reference]"}')
+    t.notThrows(() => stringify(obj))
+    const value = stringify(obj)
+    t.is(value, '{"a":"1","b":"2"}')
 })

@@ -4,7 +4,7 @@
 const test = require('ava')
 const sinon = require('sinon')
 
-const logger = require('../index')
+const logger = require('../src/index.ts')
 
 test.beforeEach((t) => {
     logger.setOutput([])
@@ -48,12 +48,12 @@ test('A logger instance should log if level and namespace are enabled', (t) => {
     logger.setLevel('info')
 
     const log = logger.createLogger()
-    const spy = sinon.spy(logger.internals, 'write')
+    const spy = sinon.spy(logger, 'write')
 
     log.info(null)
     t.true(spy.calledOnce)
 
-    logger.internals.write.restore()
+    logger.write.restore()
 })
 
 test("A logger instance shouldn't log if level is lower than enabled level", (t) => {
@@ -61,13 +61,13 @@ test("A logger instance shouldn't log if level is lower than enabled level", (t)
     logger.setLevel('info')
 
     const log = logger.createLogger()
-    const spy = sinon.spy(logger.internals, 'write')
+    const spy = sinon.spy(logger, 'write')
 
     log.debug(null, 'test')
 
     t.is(spy.callCount, 0)
 
-    logger.internals.write.restore()
+    logger.write.restore()
 })
 
 test("A logger instance shouldn't log if namespace is not enabled", (t) => {
@@ -76,13 +76,13 @@ test("A logger instance shouldn't log if namespace is not enabled", (t) => {
     logger.setLevel('info')
 
     const log = logger.createLogger('default')
-    const spy = sinon.spy(logger.internals, 'write')
+    const spy = sinon.spy(logger, 'write')
 
     log.info(null, 'test')
 
     t.is(spy.callCount, 0)
 
-    logger.internals.write.restore()
+    logger.write.restore()
 })
 
 test("A logger instance shouldn't log if log level is lower than namespace pattern level", (t) => {
@@ -91,13 +91,13 @@ test("A logger instance shouldn't log if log level is lower than namespace patte
     logger.setLevel('info')
 
     const log = logger.createLogger('test:subtest')
-    const spy = sinon.spy(logger.internals, 'write')
+    const spy = sinon.spy(logger, 'write')
 
     log.info(null, 'test')
 
     t.is(spy.callCount, 0)
 
-    logger.internals.write.restore()
+    logger.write.restore()
 })
 
 test('A logger instance should log if log level is higher or equal than namespace pattern level', (t) => {
@@ -106,12 +106,12 @@ test('A logger instance should log if log level is higher or equal than namespac
     logger.setLevel('info')
 
     const log = logger.createLogger('test:subtest')
-    const spy = sinon.spy(logger.internals, 'write')
+    const spy = sinon.spy(logger, 'write')
 
     log.debug(null)
     t.true(spy.calledOnce)
 
-    logger.internals.write.restore()
+    logger.write.restore()
 })
 
 test('A logger instance should log according to state defined in the latest matching namespace in the list', (t) => {
@@ -121,13 +121,13 @@ test('A logger instance should log according to state defined in the latest matc
 
     const log = logger.createLogger('test:subtest')
     const log2 = logger.createLogger('test2:subtest')
-    const spy = sinon.spy(logger.internals, 'write')
+    const spy = sinon.spy(logger, 'write')
 
     log.warn(null)
     log2.info('test')
-    t.is(spy.callCount, 0)
+    t.is(spy.callCount, 1)
 
-    logger.internals.write.restore()
+    logger.write.restore()
 })
 
 test('A logger should call an output adapter with log data, metadata, message and data', (t) => {
@@ -270,7 +270,7 @@ test("A logger should not log if it's namespace is disabled after call to setNam
     logger.setLevel('info')
 
     const log = logger.createLogger('ns1')
-    const spy = sinon.spy(logger.internals, 'write')
+    const spy = sinon.spy(logger, 'write')
 
     log.info(null, 'msg1')
     logger.setNamespaces('ns2:*,ns3:*')
@@ -279,7 +279,7 @@ test("A logger should not log if it's namespace is disabled after call to setNam
     t.true(spy.calledOnce)
     t.is(spy.args[0][0].message, 'msg1')
 
-    logger.internals.write.restore()
+    logger.write.restore()
 })
 
 test('A logger should not log if log level is not upper after call to setLevel', (t) => {
@@ -287,7 +287,7 @@ test('A logger should not log if log level is not upper after call to setLevel',
     logger.setLevel('info')
 
     const log = logger.createLogger('ns1')
-    const spy = sinon.spy(logger.internals, 'write')
+    const spy = sinon.spy(logger, 'write')
 
     log.info(null, 'msg1')
     logger.setLevel('warn')
@@ -296,7 +296,7 @@ test('A logger should not log if log level is not upper after call to setLevel',
     t.true(spy.calledOnce)
     t.is(spy.args[0][0].message, 'msg1')
 
-    logger.internals.write.restore()
+    logger.write.restore()
 })
 
 test('A logger should not log if upper namespace was enabled, but sub namespace level was set to none', (t) => {
@@ -304,13 +304,13 @@ test('A logger should not log if upper namespace was enabled, but sub namespace 
     logger.setLevel('info')
 
     const log = logger.createLogger('ns1:subns1')
-    const spy = sinon.spy(logger.internals, 'write')
+    const spy = sinon.spy(logger, 'write')
 
     log.info(null, 'msg1')
 
     t.is(spy.callCount, 0)
 
-    logger.internals.write.restore()
+    logger.write.restore()
 })
 
 test('A logger should return true for a call to isLevelEnabled if level and namespace is enabled', (t) => {
@@ -347,21 +347,21 @@ test('loggers should be equal if they are for the same namespace', (t) => {
 })
 
 test('parseNamespace should return a namespace if there is no level', (t) => {
-    const result = logger.internals.parseNamespace('test:*')
+    const result = logger.parseNamespace('test:*')
     t.deepEqual(result, { regex: /^test:.*?$/ })
 })
 
 test('parseNamespace should return a namespace and a level', (t) => {
-    const result = logger.internals.parseNamespace('test:*=info')
+    const result = logger.parseNamespace('test:*=info')
     t.deepEqual(result, { regex: /^test:.*?$/, level: 2 })
 })
 
 test('parseNamespace should return null if namespace is missing', (t) => {
-    const result = logger.internals.parseNamespace('=info')
+    const result = logger.parseNamespace('=info')
     t.deepEqual(result, null)
 })
 
 test('parseNamespace should return null if namespace is empty', (t) => {
-    const result = logger.internals.parseNamespace('')
+    const result = logger.parseNamespace('')
     t.deepEqual(result, null)
 })
