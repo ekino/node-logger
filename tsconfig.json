@@ -1,13 +1,23 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
-        "lib": ["es6"],
-        "target": "es6",
+        "incremental": true,
         "noImplicitAny": true,
-        "noImplicitThis": true,
+        "outDir": "./build",
+        "allowJs": true,
+        "target": "es6",
+        "module": "commonjs",
+        "lib": ["es2020"],
+        "alwaysStrict": true,
+        "sourceMap": true,
+        "skipLibCheck": true,
+        "noUnusedParameters": false,
+        "noUnusedLocals": false,
         "strictNullChecks": true,
-        "noEmit": true,
-        "forceConsistentCasingInFileNames": true
+        "noUncheckedIndexedAccess": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
     },
-    "files": ["index.d.ts"]
+    "includes": ["**/*"],
+    "exclude": ["./node_modules", "./build", "./coverage"]
 }

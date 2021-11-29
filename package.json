@@ -2,8 +2,8 @@
     "name": "@ekino/logger",
     "description": "A Lightweight logger that combines debug namespacing capabilities with winston levels and multioutput",
     "homepage": "https://github.com/ekino/node-logger",
-    "main": "index.js",
-    "types": "index.d.ts",
+    "main": "build/index.js",
+    "types": "build/index.d.ts",
     "tags": [
         "logger",
         "lightweight",
@@ -30,10 +30,14 @@
         "colors": "1.x",
         "lodash": "4.x",
         "prettyoutput": "1.x",
-        "uuid": "7.x"
+        "uuid": "8.x"
     },
     "devDependencies": {
         "@commitlint/config-conventional": "8.x",
+        "@types/lodash": "4.x",
+        "@types/node": "16.x",
+        "@types/sinon": "10.x",
+        "@types/uuid": "8.x",
         "ava": "3.x",
         "commitlint": "8.x",
         "conventional-changelog-cli": "2.x",
@@ -43,17 +47,29 @@
         "nyc": "15.x",
         "prettier": "2.x",
         "sinon": "9.x",
-        "typescript": "3.x"
+        "ts-node": "10.x",
+        "typescript": "4.x"
     },
     "scripts": {
         "fmt": "prettier --color --write \"{*,test/**/*}.{js,ts}\"",
         "check-fmt": "prettier --list-different \"{*,test/**/*}.{js,ts}\"",
-        "tsc": "tsc",
+        "tsc": "tsc -d",
         "test": "ava",
         "test-cover": "nyc ava",
         "coverage": "nyc report --reporter=text-lcov | coveralls",
         "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s -r 0",
         "version": "echo ${npm_package_version}",
         "lint": "eslint ."
+    },
+    "ava": {
+        "files": [
+            "test/**/*.js"
+        ],
+        "extensions": [
+            "js"
+        ],
+        "require": [
+            "ts-node/register"
+        ]
     }
 }

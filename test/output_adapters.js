@@ -5,8 +5,8 @@ const test = require('ava')
 const sinon = require('sinon')
 const _ = require('lodash')
 
-const outputAdapters = require('../output_adapters')
-const logger = require('../index')
+const outputAdapters = require('../output_adapters.ts')
+const logger = require('../index.ts')
 
 const stdoutWrite = process.stdout.write
 
@@ -104,7 +104,7 @@ test('pretty output adapter should write yaml like data and an \\n to stdout if 
     const firstCall = spy.firstCall.args[0]
     const secondCall = spy.secondCall.args[0]
 
-    let expected = `${outputAdapters.internals.prettyTime(log.time)} (test1) [warn] : \u001b[33mtest\u001b[39m\n`
+    let expected = `${outputAdapters.prettyTime(log.time)} (test1) [warn] : \u001b[33mtest\u001b[39m\n`
     expected += '\u001b[32m  contextId: \u001b[39mctxId\n'
     expected += '\u001b[32m  meta: \u001b[39m\n'
     expected += '\u001b[32m    field1: \u001b[39mvalue1\n'
@@ -133,7 +133,7 @@ test('pretty output adapter should work if used by logger', (t) => {
     const firstCall = spy.firstCall.args[0]
     const secondCall = spy.secondCall.args[0]
 
-    let expected = `${outputAdapters.internals.prettyTime(new Date(1547205226232))} (test:subTest) [warn] : \u001b[33mtest\u001b[39m\n`
+    let expected = `${outputAdapters.prettyTime(new Date(1547205226232))} (test:subTest) [warn] : \u001b[33mtest\u001b[39m\n`
     expected += '\u001b[32m  contextId: \u001b[39mctxId\n'
     expected += '\u001b[32m  data: \u001b[39m\n'
     expected += '\u001b[32m    someData: \u001b[39msomeValue\n'
