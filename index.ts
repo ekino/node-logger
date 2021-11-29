@@ -5,7 +5,7 @@ import { Internal, Logger, LogLevel, LogInstance, NameSpaceConfig, OutputAdapter
 import * as outputAdapters from './output_adapters'
 import * as outputUtils from './output_utils'
 
-const internals: Internal = {}
+export const internals: Internal = {}
 
 /**
  * @typedef {Function} LoggerLogFunction
@@ -85,7 +85,7 @@ export const setNamespaces = (namespace: string): void => {
         const parsedNamespace = parseNamespace(name)
         if (!parsedNamespace) return
 
-        internals.namespaces?.push(parsedNamespace)
+        internals.namespaces!.push(parsedNamespace)
     })
 
     syncLoggers()
@@ -100,11 +100,8 @@ export const setLevel = (level: LogLevel): void => {
         throw new Error(`Invalid level: '${level}'`)
     }
 
-    // expose level name
-    exports.level = level
-
     // internally store corresponding level index
-    internals.level = internals.levels.indexOf(level)
+    internals.level = internals.levels?.indexOf(level)
 
     syncLoggers()
 }
@@ -131,7 +128,7 @@ export const setOutput = (outputs?: OutputAdapter[] | OutputAdapter): void => {
  * even those from third party libraries if they use this module.
  * @param {Object} context - The object holding default context data
  */
-export const setGlobalContext = (context: unknown): void => {
+export const setGlobalContext = (context: Record<string, unknown>): void => {
     internals.globalContext = context
 }
 
@@ -143,31 +140,6 @@ export const setGlobalContext = (context: unknown): void => {
 export const id = (): string => {
     return uuidv4()
 }
-
-/************* INTERNALS *************/
-internals.loggers = {}
-internals.levels = ['trace', 'debug', 'info', 'warn', 'error', 'none']
-
-/**
- * List of output functions
- * @type {Array<OutputAdapter>}
- */
-internals.outputs = [outputAdapters.json]
-
-/**
- * Internally we store level index as it's quicker to compare numbers
- */
-internals.level = undefined
-
-/**
- * Internally store parsed namespaces,
- * `exports.namespaces` contains raw config.
- *
- * @type {Array<NamespaceConfig>}
- */
-internals.namespaces = []
-
-internals.globalContext = {}
 
 /**
  * Parse a namespace to extract level, namespace (eg: ns1:subns1=info)
@@ -215,7 +187,7 @@ export const log = (namespace: string, level: LogLevel, contextId?: string | nul
     contextId = contextId || id()
     const time = new Date()
     const logInstance: LogInstance = { level, time, namespace, contextId }
-    logInstance.meta = Object.assign({}, internals.globalContext)
+    if (internals.globalContext) logInstance.meta = Object.assign({}, internals.globalContext)
     if (message) logInstance.message = message
     if (data) logInstance.data = data
 
@@ -230,29 +202,6 @@ export const write = (logInstance: LogInstance): void => {
     internals.outputs?.forEach((outputFn) => {
         outputFn(logInstance)
     })
-}
-
-/**
- * True if both namespace and level are enabled.
- * @param {String} namespace
- * @param {String} level
- * @return {Boolean} true if enabled
- */
-internals.isEnabled = (namespace, level): boolean => {
-    let nsLevel = internals.level || 0
-    let nsMatch = false
-
-    _.forEachRight(internals.namespaces, (ns) => {
-        if (ns.regex?.test(namespace)) {
-            nsMatch = true
-            if (ns.level) {
-                nsLevel = ns.level
-                return false
-            }
-        }
-    })
-
-    return nsMatch && level >= nsLevel
 }
 
 /**
@@ -277,9 +226,6 @@ export const syncLogger = (logger: Logger, namespace: string): Logger => {
                 logger[level] = () => {}
             } else {
                 enabledLevels[level] = true
-
-                // @TODO: to fix this, try to make optional method in LogMethod interface
-                // @ts-ignore
                 logger[level] = (contextId: string, message: string, data?: unknown) => {
                     log(namespace, level, contextId, message, data)
                 }
@@ -302,6 +248,53 @@ export const syncLoggers = () => {
     })
 }
 
+/************* INTERNALS *************/
+internals.loggers = {}
+internals.levels = ['trace', 'debug', 'info', 'warn', 'error', 'none']
+/**
+ * List of output functions
+ * @type {Array<OutputAdapter>}
+ */
+internals.outputs = [outputAdapters.json]
+
+/**
+ * Internally we store level index as it's quicker to compare numbers
+ */
+internals.level = undefined
+
+/**
+ * Internally store parsed namespaces,
+ * `exports.namespaces` contains raw config.
+ *
+ * @type {Array<NamespaceConfig>}
+ */
+internals.namespaces = []
+
+internals.globalContext = {}
+
+/**
+ * True if both namespace and level are enabled.
+ * @param {String} namespace
+ * @param {String} level
+ * @return {Boolean} true if enabled
+ */
+internals.isEnabled = (namespace, level): boolean => {
+    let nsLevel = internals.level || 0
+    let nsMatch = false
+
+    _.forEachRight(internals.namespaces, (ns) => {
+        if (ns.regex?.test(namespace)) {
+            nsMatch = true
+            if (ns.level) {
+                nsLevel = ns.level
+                return false
+            }
+        }
+    })
+
+    return nsMatch && level >= nsLevel
+}
+
 /************* INIT *************/
 const namespaces = process.env.LOGS || '*'
 const logLevel: LogLevel = (process.env.LOG_LEVEL as LogLevel) || 'warn'
@@ -309,5 +302,5 @@ const logLevel: LogLevel = (process.env.LOG_LEVEL as LogLevel) || 'warn'
 setNamespaces(namespaces)
 setLevel(logLevel)
 
-export { internals, outputAdapters as outputs, setOutput as setOutputs }
+export { outputAdapters as outputs }
 export { outputAdapters, outputUtils }

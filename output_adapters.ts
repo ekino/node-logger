@@ -1,9 +1,22 @@
 import _ from 'lodash'
 import colors from 'colors/safe'
-const prettyOutput = require('prettyoutput')
+import prettyOutput from 'prettyoutput'
 
 import * as outputUtils from './output_utils'
-import { LogInstance, Output } from './definitions'
+import { LogColor, LogInstance, LogLevel, Output } from './definitions'
+
+/**
+ * Object mapping log color and log level
+ * @param {Record<LogLevel, LogColor>} levelColorMap
+ */
+const levelColorMap: Record<LogLevel, LogColor> = {
+    none: 'red',
+    error: 'red',
+    warn: 'yellow',
+    info: 'blue',
+    debug: 'white',
+    trace: 'grey',
+}
 
 /**
  * Make sure that we get a 2 digit number by beginning with a 0 if length < 2
@@ -11,7 +24,7 @@ import { LogInstance, Output } from './definitions'
  * @returns {string}
  */
 export const twoDigitNumber = (num?: number | string): string => {
-    return `${num}`.length < 2 ? `0${num}` : `${num}`
+    return num != null ? (`${num}`.length < 2 ? `0${num}` : `${num}`) : ''
 }
 
 /**
@@ -25,7 +38,7 @@ export const prettyTime = (time?: Date): string | undefined => {
     const year = twoDigitNumber(time.getFullYear())
     const month = twoDigitNumber(time.getMonth() + 1)
     const day = twoDigitNumber(time.getDate())
-    const hours = twoDigitNumber(time.getHours())
+    const hours = twoDigitNumber(time.getUTCHours())
     const minutes = twoDigitNumber(time.getMinutes())
     const seconds = twoDigitNumber(time.getSeconds())
 
@@ -38,29 +51,18 @@ export const prettyTime = (time?: Date): string | undefined => {
  */
 export const pretty = (logInstance: LogInstance): void => {
     const time = prettyTime(logInstance.time)
+    const defaultLevel = logInstance.level || 'error'
 
-    const levelColorMap = {
-        error: 'red',
-        warn: 'yellow',
-        info: 'blue',
-        debug: 'white',
-        trace: 'grey',
-    }
+    const levelColor = levelColorMap[defaultLevel]
 
-    // @TODO: to fix the type of colors
-    // @ts-ignore
-    const levelColor = levelColorMap[logInstance.level] || 'red'
-
-    const infos = `${time} (${logInstance.namespace}) [${logInstance.level}] : `
+    const infos = `${time} (${logInstance.namespace}) [${defaultLevel}] : `
 
     const output: Output = {}
     if (!_.isEmpty(logInstance.contextId)) output.contextId = logInstance.contextId
     if (!_.isEmpty(logInstance.meta)) output.meta = logInstance.meta
     if (!_.isEmpty(logInstance.data)) output.data = logInstance.data
 
-    // @TODO: to fix the type of colors
-    // @ts-ignore
-    const result = `${infos}${colors[levelColor](logInstance.message)}\n${prettyOutput(output, { maxDepth: 6 }, 2)}`
+    const result = `${infos}${colors[levelColor](logInstance.message || '')}\n${prettyOutput(output, { maxDepth: 6 }, 2)}`
 
     process.stdout.write(result)
     process.stdout.write('\n')

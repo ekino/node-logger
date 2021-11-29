@@ -18,6 +18,6 @@
         "allowSyntheticDefaultImports": true,
         "forceConsistentCasingInFileNames": true,
     },
-    "includes": ["**/*"],
+    "include": ["**/*.ts"],
     "exclude": ["./node_modules", "./build", "./coverage"]
 }

@@ -40,6 +40,8 @@ export interface Internal {
     levels?: LogLevel[]
     level?: number
     outputs?: OutputAdapter[]
-    globalContext?: unknown
+    globalContext?: Record<string, unknown>
     isEnabled?(namespace: string, index: number): boolean
 }
+
+export type LogColor = 'red' | 'yellow' | 'blue' | 'white' | 'grey'

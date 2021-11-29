@@ -34,42 +34,31 @@
     },
     "devDependencies": {
         "@commitlint/config-conventional": "8.x",
+        "@types/jest": "27.x",
         "@types/lodash": "4.x",
         "@types/node": "16.x",
-        "@types/sinon": "10.x",
         "@types/uuid": "8.x",
-        "ava": "3.x",
         "commitlint": "8.x",
         "conventional-changelog-cli": "2.x",
         "coveralls": "3.x",
         "eslint": "6.x",
         "husky": "4.x",
-        "nyc": "15.x",
+        "jest": "27.x",
         "prettier": "2.x",
-        "sinon": "9.x",
+        "ts-jest": "27.x",
         "ts-node": "10.x",
         "typescript": "4.x"
     },
     "scripts": {
         "fmt": "prettier --color --write \"{*,test/**/*}.{js,ts}\"",
         "check-fmt": "prettier --list-different \"{*,test/**/*}.{js,ts}\"",
-        "tsc": "tsc -d",
-        "test": "ava",
-        "test-cover": "nyc ava",
-        "coverage": "nyc report --reporter=text-lcov | coveralls",
+        "tsc": "rm -rf build & tsc -d",
+        "test": "jest",
+        "test-cover": "jest --coverage",
+        "coverage": "jest --coverage --coverageReporters=text-lcov | coveralls",
         "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s -r 0",
         "version": "echo ${npm_package_version}",
         "lint": "eslint ."
     },
-    "ava": {
-        "files": [
-            "test/**/*.js"
-        ],
-        "extensions": [
-            "js"
-        ],
-        "require": [
-            "ts-node/register"
-        ]
-    }
+    "eslintIgnore": ["build", "examples"]
 }
