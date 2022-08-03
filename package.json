@@ -30,20 +30,20 @@
         "colors": "1.x",
         "lodash": "4.x",
         "prettyoutput": "1.x",
-        "uuid": "7.x"
+        "uuid": "8.x"
     },
     "devDependencies": {
-        "@commitlint/config-conventional": "8.x",
-        "ava": "3.x",
-        "commitlint": "8.x",
+        "@commitlint/config-conventional": "17.x",
+        "ava": "4.x",
+        "commitlint": "17.x",
         "conventional-changelog-cli": "2.x",
         "coveralls": "3.x",
-        "eslint": "6.x",
-        "husky": "4.x",
+        "eslint": "8.x",
+        "husky": "8.x",
         "nyc": "15.x",
         "prettier": "2.x",
-        "sinon": "9.x",
-        "typescript": "3.x"
+        "sinon": "14.x",
+        "typescript": "4.x"
     },
     "scripts": {
         "fmt": "prettier --color --write \"{*,test/**/*}.{js,ts}\"",
@@ -54,6 +54,7 @@
         "coverage": "nyc report --reporter=text-lcov | coveralls",
         "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s -r 0",
         "version": "echo ${npm_package_version}",
-        "lint": "eslint ."
+        "lint": "eslint .",
+        "postinstall": "husky install"
     }
 }
