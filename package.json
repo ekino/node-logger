@@ -24,7 +24,7 @@
     "license": "MIT",
     "version": "1.0.0",
     "engines": {
-        "node": ">=10.18.0"
+        "node": ">=14"
     },
     "dependencies": {
         "colors": "1.x",
@@ -48,7 +48,7 @@
     "scripts": {
         "fmt": "prettier --color --write \"{*,test/**/*}.{js,ts}\" --cache",
         "check-fmt": "prettier --list-different \"{*,test/**/*}.{js,ts}\"",
-        "tsc": "tsc",
+        "build": "tsc",
         "test": "ava",
         "test-cover": "nyc ava",
         "coverage": "nyc report --reporter=text-lcov | coveralls",
@@ -56,5 +56,11 @@
         "version": "echo ${npm_package_version}",
         "lint": "eslint .",
         "postinstall": "husky install"
+    },
+    "nyc": {
+        "reporter": [
+            "lcov",
+            "text-lcov"
+        ]
     }
 }
