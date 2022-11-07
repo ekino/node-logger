@@ -1,8 +1,8 @@
-const logger = require('../index')
+const logger = require('../lib/index')
 
 logger.setNamespaces('namespace:*')
 logger.setLevel('debug')
 logger.setOutput(logger.outputs.pretty)
 
-const log = logger('namespace:subNamespace')
-log.debug('ctxId', 'Will be logged',{someData: 'someValue', someData2: 'someValue'})
+const log = logger.createLogger('namespace:subNamespace')
+log.debug('ctxId', 'Will be logged', { someData: 'someValue', someData2: 'someValue' })

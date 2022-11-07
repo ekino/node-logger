@@ -5,6 +5,7 @@ NODE_MODULES     ?= "./node_modules"
 NODE_MODULES_BIN ?= "${NODE_MODULES}/.bin"
 
 FROM_VERSION     ?= $(shell yarn run -s version)
+EXAMPLE_FILES 	 := $(shell find "examples" -name "*.js")
 
 ############## HELP ##############
 
@@ -55,3 +56,10 @@ release: ##@release generates a new release
 	@git commit -m "chore(v${RELEASE_VERSION}): bump version to ${RELEASE_VERSION}"
 	@git tag -a "v${RELEASE_VERSION}" -m "version ${RELEASE_VERSION}"
 	@git push origin v${RELEASE_VERSION}
+
+examples: ##@examples run examples files
+	@echo "${YELLOW}start to run all examples files"
+	@if [ ! -d "lib" ]; then yarn build; fi;\
+    for file in $(EXAMPLE_FILES); do echo "\n\nRun $${file}"; node $${file}; done;\
+
+.PHONY: examples

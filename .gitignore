@@ -51,3 +51,4 @@ jspm_packages
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
+.vscode
