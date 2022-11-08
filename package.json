@@ -2,9 +2,13 @@
     "name": "@ekino/logger",
     "description": "A Lightweight logger that combines debug namespacing capabilities with winston levels and multioutput",
     "homepage": "https://github.com/ekino/node-logger",
+    "license": "MIT",
+    "version": "1.0.0",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
-    "files": ["/lib"],
+    "files": [
+        "/lib"
+    ],
     "tags": [
         "logger",
         "lightweight",
@@ -16,14 +20,9 @@
     },
     "maintainers": [
         {
-            "name": "Raphaël Benitte"
-        },
-        {
-            "name": "Nadim El-Boustani"
+            "name": "Mikaël Bouchez"
         }
     ],
-    "license": "MIT",
-    "version": "1.0.0",
     "engines": {
         "node": ">=14"
     },
@@ -38,6 +37,7 @@
         "@types/uuid": "8.x",
         "ava": "4.x",
         "commitlint": "17.x",
+        "conventional-changelog": "3.1.24",
         "conventional-changelog-cli": "2.x",
         "coveralls": "3.x",
         "eslint": "8.x",
@@ -56,7 +56,7 @@
         "test": "ava",
         "test-cover": "nyc ava",
         "coverage": "nyc ava | coveralls",
-        "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s -r 0",
+        "changelog": "yarn conventional-changelog -p conventionalcommits -r -u 0",
         "version": "echo ${npm_package_version}",
         "lint": "eslint .",
         "postinstall": "husky install"

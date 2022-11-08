@@ -1,0 +1,96 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      strategy:
+        description: Valid semver number <x.x.x> or strategy <patch, minor, major>
+        default: "patch"
+        required: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+    
+    if: ${{ github.actor == 'pebie' || github.actor == 'Crow-EH' || github.actor == 'fthouraud' || github.actor == 'leguellec' || github.actor == 'rande' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+
+      - uses: actions/cache@v3
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        if: steps.yarn-cache-dir-path.outputs.cache-hit != 'true'
+        run: yarn install
+
+      - name: Build
+        run: yarn build
+
+      - name: Bump the version using input strategy
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          yarn version --new-version ${{ github.event.inputs.strategy }} --no-git-tag-version
+
+      - name: Update changelog    
+        id: changelog
+        run: |
+          CHANGELOG=$(yarn conventional-changelog -p conventionalcommits -r -u 0)
+          echo -e "${CHANGELOG}\n\n\n\n$(cat CHANGELOG.md)" > CHANGELOG.md
+          BODY=$(echo -e "${CHANGELOG}" | sed -e "1,2d")
+          BODY="${BODY//'%'/'%25'}"
+          BODY="${BODY//$'\n'/'%0A'}"
+          BODY="${BODY//$'\r'/'%0D'}"
+          echo "::set-output name=body::${BODY}"
+
+      - name: Log changes
+        run: |
+          echo "The changelog will be : ${{ steps.changelog.outputs.body }}"
+            
+      - name: Get version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.2.3
+
+      - name: Create tag
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .
+          git commit -m "chore(bump): release v${{ steps.package-version.outputs.current-version }}"
+          git push
+          git tag -a v${{ steps.package-version.outputs.current-version }} -m "chore(tag): release v${{ steps.package-version.outputs.current-version }}"
+          git push origin v${{ steps.package-version.outputs.current-version }}
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          body: ${{ steps.changelog.outputs.body }}
+          tag_name: v${{ steps.package-version.outputs.current-version }}
+          name: v${{ steps.package-version.outputs.current-version }}
+
+      - name: Setup npmrc
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+          
+      - name: Publish to NPM
+        run: npm publish --access public
+        env:
+          VERSION: ${{ steps.package-version.outputs.current-version }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
