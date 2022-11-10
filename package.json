@@ -3,7 +3,7 @@
     "description": "A Lightweight logger that combines debug namespacing capabilities with winston levels and multioutput",
     "homepage": "https://github.com/ekino/node-logger",
     "license": "MIT",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
     "files": [
