@@ -1,5 +1,13 @@
 yarn run v1.22.19
 $ /home/runner/work/node-logger/node-logger/node_modules/.bin/conventional-changelog -p conventionalcommits -r -u 0
+### [2.0.1](https://github.com/ekino/node-logger/compare/v2.0.0...v2.0.1) (2022-11-10)
+
+Done in 0.37s.
+
+
+
+yarn run v1.22.19
+$ /home/runner/work/node-logger/node-logger/node_modules/.bin/conventional-changelog -p conventionalcommits -r -u 0
 ## [2.0.0](https://github.com/ekino/node-logger/compare/v1.0.0...v2.0.0) (2022-11-10)
 
 
