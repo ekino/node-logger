@@ -1,3 +1,17 @@
+yarn run v1.22.19
+$ /home/runner/work/node-logger/node-logger/node_modules/.bin/conventional-changelog -p conventionalcommits -r -u 0
+## [2.0.0](https://github.com/ekino/node-logger/compare/v1.0.0...v2.0.0) (2022-11-10)
+
+
+### Features
+
+* **ci:** add release ([67b3b7b](https://github.com/ekino/node-logger/commit/67b3b7baa2b260695d35227d1374aecb145b4622))
+* **typescript:** convert core files to ts ([840741e](https://github.com/ekino/node-logger/commit/840741e296714e4022de8e33a58e3495f6789d3f))
+
+Done in 0.50s.
+
+
+
 ## [1.0.0](https://github.com/ekino/node-logger/compare/v0.3.0...v1.0.0) (2020-03-25)
 
 
@@ -28,4 +42,3 @@
 ### Bug Fixes
 
 * **global-context:** prevent mutation of global context ([686724b](https://github.com/ekino/node-logger/commit/686724b43bc398c9ddf6fcd62ab515c377e4cb51))
-
