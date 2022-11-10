@@ -57,8 +57,7 @@
         "test-cover": "nyc ava",
         "coverage": "nyc ava | coveralls",
         "version": "echo ${npm_package_version}",
-        "lint": "eslint .",
-        "postinstall": "husky install"
+        "lint": "eslint ."
     },
     "eslintIgnore": [
         "lib",
