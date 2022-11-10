@@ -52,3 +52,5 @@ jspm_packages
 !.yarn/versions
 .pnp.*
 .vscode
+
+events.json
