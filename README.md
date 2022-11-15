@@ -283,6 +283,22 @@ output:
 
 ![Example](docs/images/example_data.gif)
 
+### Force Log
+
+You can force to write the log even the logLevel isn't enabled.
+
+```js
+const { setOutput, setNamespaces, setLevel, createLogger } = require('@ekino/logger')
+
+setOutput('pretty')
+setNamespaces('namespace:*')
+setLevel('info')
+
+const log = logger.createLogger('namespace', true)
+const num = 1
+log.debug('Will be logged', { someData: 'someValue' }, num > 0)
+```
+
 #### Adding global metadata
 
 Sometimes, you need to identify to which version or which application the logs refers to.

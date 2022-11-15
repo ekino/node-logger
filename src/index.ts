@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
-import { Internal, Logger, LogLevel, Log, NameSpaceConfig, OutputAdapter } from './definitions'
+import { Internal, Logger, LogLevel, Log, NameSpaceConfig, OutputAdapter, LogMethod } from './definitions'
 
 import * as outputs from './output_adapters'
 import * as outputUtils from './output_utils'
@@ -90,15 +90,16 @@ internals.isEnabled = (namespace, level): boolean => {
 /**
  * @typedef {Function} createLogger
  * @param {String} [namespace]
+ * @param {boolean} canForceWrite
  * @return {Logger}
  */
-export const createLogger = (namespace?: string): Logger => {
+export const createLogger = (namespace?: string, canForceWrite?: boolean): Logger => {
     namespace = namespace || ''
 
     let logger = internals.loggers?.[namespace]
     if (logger) return logger
 
-    logger = syncLogger({} as Logger, namespace)
+    logger = syncLogger({} as Logger, namespace, canForceWrite)
     if (internals.loggers) internals.loggers[namespace] = logger
 
     return logger
@@ -211,15 +212,18 @@ export const parseNamespace = (namespace: string): NameSpaceConfig | null => {
  * @param {String} [contextId]
  * @param {String} message
  * @param {Object} [data] - An object holding data to help understand the error
+ * @param {boolean} forceLogging
  */
 export const log = (
     namespace: string,
     level: LogLevel,
     contextId?: string | null,
     message?: string | Record<string, unknown> | null,
-    data?: Record<string, unknown>
+    data?: Record<string, unknown>,
+    forceLogging?: boolean | Record<string, unknown>
 ): void => {
     if (isObject(message)) {
+        forceLogging = data
         data = message
         message = contextId
         contextId = null
@@ -230,7 +234,7 @@ export const log = (
     const logInstance: Log = { level, time, namespace, contextId, meta: {}, message: message || contextId, data }
     if (internals.globalContext) logInstance.meta = Object.assign({}, internals.globalContext)
 
-    write(logInstance)
+    if(forceLogging || internals.loggers[namespace]?.isLevelEnabled(level)) write(logInstance)
 }
 
 /**
@@ -249,9 +253,10 @@ export const write = (logInstance: Log): void => {
  * If enabled, calls log function.
  * @param {Logger} logger
  * @param {String} namespace
+ * @param {boolean} canForceWrite
  * @return {Logger}
  */
-export const syncLogger = (logger: Logger, namespace: string): Logger => {
+export const syncLogger = (logger: Logger, namespace: string, canForceWrite?: boolean): Logger => {
     for (const key in logger) {
         delete logger[key as keyof Logger]
     }
@@ -260,14 +265,16 @@ export const syncLogger = (logger: Logger, namespace: string): Logger => {
     if (internals.levels) {
         internals.levels.forEach((level, idx) => {
             if (level === 'none') return
-            if (!internals.isEnabled?.(namespace, idx)) {
+            const levelIsEnabled = internals.isEnabled?.(namespace, idx) ?? false
+            if ( levelIsEnabled || canForceWrite) {
+                enabledLevels[level] = levelIsEnabled
+
+                logger[level] = ((contextId: string, message: string, data?: Record<string, unknown>, forceLogging?: boolean) => {
+                    log(namespace, level, contextId, message, data, forceLogging)
+                }) as LogMethod
+            } else {
                 enabledLevels[level] = false
                 logger[level] = () => {}
-            } else {
-                enabledLevels[level] = true
-                logger[level] = (contextId: string, message: string, data?: Record<string, unknown>) => {
-                    log(namespace, level, contextId, message, data)
-                }
             }
         })
 

@@ -70,6 +70,20 @@ test("A logger instance shouldn't log if level is lower than enabled level", (t)
     logger.write.restore()
 })
 
+test('A logger instance should log if instance can forceWrite and forceLogging is truthy', (t) => {
+    logger.setNamespaces('*')
+    logger.setLevel('info')
+
+    const log = logger.createLogger('test', true)
+    const spy = sinon.spy(logger, 'write')
+
+    log.debug(null, {}, true)
+
+    t.is(spy.callCount, 1)
+
+    logger.write.restore()
+})
+
 test("A logger instance shouldn't log if namespace is not enabled", (t) => {
     logger.setNamespaces('test:*')
 
