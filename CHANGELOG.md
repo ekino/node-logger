@@ -1,5 +1,18 @@
 yarn run v1.22.19
 $ /home/runner/work/node-logger/node-logger/node_modules/.bin/conventional-changelog -p conventionalcommits -r -u 0
+## [2.1.0](https://github.com/ekino/node-logger/compare/v2.0.2...v2.1.0) (2023-01-04)
+
+
+### Features
+
+* **forceWrite:** add posibility to force the log ([017db9e](https://github.com/ekino/node-logger/commit/017db9ea5dc81a536840a300adeea3e2b3f4eb83))
+
+Done in 0.41s.
+
+
+
+yarn run v1.22.19
+$ /home/runner/work/node-logger/node-logger/node_modules/.bin/conventional-changelog -p conventionalcommits -r -u 0
 ### [2.0.2](https://github.com/ekino/node-logger/compare/v2.0.1...v2.0.2) (2022-11-10)
 
 
