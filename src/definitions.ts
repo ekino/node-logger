@@ -30,8 +30,8 @@ export interface OutputAdapter {
 }
 
 export interface LogMethod {
-    (contextId: string, message: string, data?: unknown): void
-    (message: string, data?: unknown): void
+    (contextId: string, message: string, data?: unknown, forceLogging?: boolean): void
+    (message: string, data?: unknown, forceLogging?: boolean): void
 }
 
 export interface Internal {
