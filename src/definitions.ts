@@ -23,6 +23,7 @@ export interface Logger {
     warn: LogMethod
     error: LogMethod
     isLevelEnabled(level: string): boolean | undefined
+    canForceWrite?: boolean
 }
 
 export interface OutputAdapter {
