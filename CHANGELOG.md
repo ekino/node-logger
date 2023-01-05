@@ -1,5 +1,18 @@
 yarn run v1.22.19
 $ /home/runner/work/node-logger/node-logger/node_modules/.bin/conventional-changelog -p conventionalcommits -r -u 0
+### [2.1.1](https://github.com/ekino/node-logger/compare/v2.1.0...v2.1.1) (2023-01-05)
+
+
+### Bug Fixes
+
+* **force:** prevent syncLogger reset canForceWrite ([e8546f1](https://github.com/ekino/node-logger/commit/e8546f112cd8f089825f5a242b08c2aedb393553))
+
+Done in 0.52s.
+
+
+
+yarn run v1.22.19
+$ /home/runner/work/node-logger/node-logger/node_modules/.bin/conventional-changelog -p conventionalcommits -r -u 0
 ## [2.1.0](https://github.com/ekino/node-logger/compare/v2.0.2...v2.1.0) (2023-01-04)
 
 
