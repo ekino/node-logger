@@ -84,6 +84,19 @@ test('A logger instance should log if instance can forceWrite and forceLogging i
     logger.write.restore()
 })
 
+test('setLevel and setNamespace should not reset canForceWrite', (t) => {
+    const log = logger.createLogger('test', true)
+    logger.setNamespaces('*')
+    logger.setLevel('info')
+    const spy = sinon.spy(logger, 'write')
+
+    log.debug(null, {}, true)
+
+    t.is(spy.callCount, 1)
+
+    logger.write.restore()
+})
+
 test("A logger instance shouldn't log if namespace is not enabled", (t) => {
     logger.setNamespaces('test:*')
 

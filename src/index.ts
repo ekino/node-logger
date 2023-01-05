@@ -280,7 +280,7 @@ export const syncLogger = (logger: Logger, namespace: string, canForceWrite?: bo
 
         logger.isLevelEnabled = (level) => enabledLevels[level]
     }
-
+    logger.canForceWrite = canForceWrite
     return logger
 }
 
@@ -290,7 +290,7 @@ export const syncLogger = (logger: Logger, namespace: string, canForceWrite?: bo
  */
 export const syncLoggers = () => {
     for (const [namespace, logger] of Object.entries(internals.loggers)) {
-        syncLogger(logger, namespace)
+        syncLogger(logger, namespace, logger.canForceWrite)
     }
 }
 
