@@ -1,14 +1,27 @@
 {
     "name": "@ekino/logger",
-    "description": "A Lightweight logger that combines debug namespacing capabilities with winston levels and multioutput",
+    "description": "A Lightweight logger that combines debug namespacing capabilities with winston levels and multi-output",
     "homepage": "https://github.com/ekino/node-logger",
     "license": "MIT",
     "version": "2.1.1",
-    "main": "lib/index.js",
-    "types": "lib/index.d.ts",
+    "type": "module",
     "files": [
         "/lib"
     ],
+    "main": "lib/esm/index.js",
+    "types": "lib/esm/index.d.ts",
+    "exports": {
+        ".": {
+            "require": {
+                "default": "./lib/cjs/index.js",
+                "types": "./lib/cjs/index.d.ts"
+            },
+            "import": {
+                "default": "./lib/esm/index.js",
+                "types": "./lib/esm/index.d.ts"
+            }
+        }
+    },
     "tags": [
         "logger",
         "lightweight",
@@ -24,7 +37,7 @@
         }
     ],
     "engines": {
-        "node": ">=14"
+        "node": ">=18"
     },
     "dependencies": {
         "colors": "1.x",
@@ -34,50 +47,34 @@
     "devDependencies": {
         "@commitlint/config-conventional": "17.x",
         "@types/node": "18.x",
-        "@types/uuid": "8.x",
-        "ava": "4.x",
+        "@types/uuid": "9.x",
+        "@typescript-eslint/eslint-plugin": "6.x",
+        "@typescript-eslint/parser": "6.x",
+        "ava": "5.x",
+        "c8": "8.x",
         "commitlint": "17.x",
-        "conventional-changelog": "3.x",
-        "conventional-changelog-cli": "2.x",
+        "conventional-changelog": "5.x",
+        "conventional-changelog-cli": "4.x",
         "coveralls": "3.x",
         "eslint": "8.x",
         "husky": "8.x",
-        "nyc": "15.x",
-        "prettier": "2.x",
-        "sinon": "14.x",
+        "prettier": "3.x",
+        "sinon": "16.x",
         "ts-node": "10.x",
-        "typescript": "4.x"
+        "typescript": "5.x",
+        "zx": "7.x"
     },
     "scripts": {
-        "fmt": "prettier --color --write \"{*,test/**/*}.{js,ts}\" --cache",
+        "fmt": "prettier --color --write \"{*,src/**/*,test/**/*}.{js,ts}\" --cache",
         "check-fmt": "prettier --list-different \"{*,test/**/*}.{js,ts}\"",
-        "build": "tsc --build tsconfig.lib.json",
+        "build": "node scripts/build.js",
         "prepublishOnly": "rm -rf lib && yarn build",
         "test": "ava",
-        "test-cover": "nyc ava",
-        "coverage": "nyc ava | coveralls",
+        "test-cover": "c8 ava",
+        "coverage": "yarn test-cover | coveralls",
         "version": "echo ${npm_package_version}",
-        "lint": "eslint ."
-    },
-    "eslintIgnore": [
-        "lib",
-        "examples"
-    ],
-    "ava": {
-        "files": [
-            "test/**/*.js"
-        ],
-        "extensions": [
-            "js"
-        ],
-        "require": [
-            "ts-node/register"
-        ]
-    },
-    "nyc": {
-        "reporter": [
-            "lcov",
-            "text-lcov"
-        ]
+        "lint-fix": "eslint \"{src,test}/**/*.{js,ts}\" --fix",
+        "lint": "eslint \"{src,test}/**/*.{js,ts}\"",
+        "examples": "node examples/index.js"
     }
 }

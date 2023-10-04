@@ -1,32 +1,30 @@
 'use strict'
 /* eslint-disable no-shadow */
 
-const test = require('ava')
-const sinon = require('sinon')
+import test from 'ava'
+import sinon, { stub, useFakeTimers } from 'sinon'
+import { createLogger, parseNamespace, setGlobalContext, setLevel, setNamespaces, setOutput, loggerMock } from '../src/index.js'
 
-const logger = require('../src/index.ts')
-
-test.beforeEach((t) => {
-    logger.setOutput([])
+test.beforeEach(() => {
+    setOutput([])
 })
 
 test('A logger instance should have levels function and isLevelEnabled function', (t) => {
-    const log = logger.createLogger()
+    const log = createLogger()
     t.is(typeof log.trace, 'function')
     t.is(typeof log.debug, 'function')
     t.is(typeof log.info, 'function')
     t.is(typeof log.warn, 'function')
     t.is(typeof log.error, 'function')
     t.is(typeof log.isLevelEnabled, 'function')
-    t.is(typeof log.none, 'undefined')
 })
 
 test('A logger instance should only accept functions', (t) => {
     const error = t.throws(
         () => {
-            logger.setOutput('invalid')
+            setOutput('invalid')
         },
-        { instanceOf: Error }
+        { instanceOf: Error },
     )
 
     t.is(error.message, `Invalid output: 'invalid'`)
@@ -35,139 +33,141 @@ test('A logger instance should only accept functions', (t) => {
 test('A logger instance should only accept allowed levels', (t) => {
     const error = t.throws(
         () => {
-            logger.setLevel('invalid')
+            setLevel('invalid')
         },
-        { instanceOf: Error }
+        { instanceOf: Error },
     )
 
     t.is(error.message, `Invalid level: 'invalid'`)
 })
 
 test('A logger instance should log if level and namespace are enabled', (t) => {
-    logger.setNamespaces('*')
-    logger.setLevel('info')
+    const writeStub = sinon.stub(loggerMock, 'write')
 
-    const log = logger.createLogger()
-    const spy = sinon.spy(logger, 'write')
+    setNamespaces('*')
+    setLevel('info')
 
-    log.info(null)
-    t.true(spy.calledOnce)
+    const log = createLogger()
 
-    logger.write.restore()
+    log.info('')
+    t.is(writeStub.callCount, 1)
+
+    writeStub.restore()
 })
 
 test("A logger instance shouldn't log if level is lower than enabled level", (t) => {
-    logger.setNamespaces('*')
-    logger.setLevel('info')
+    const writeStub = sinon.stub(loggerMock, 'write')
 
-    const log = logger.createLogger()
-    const spy = sinon.spy(logger, 'write')
+    setNamespaces('*')
+    setLevel('info')
 
-    log.debug(null, 'test')
+    const log = createLogger()
 
-    t.is(spy.callCount, 0)
+    log.debug('', 'test')
 
-    logger.write.restore()
+    t.is(writeStub.callCount, 0)
+    writeStub.restore()
 })
 
 test('A logger instance should log if instance can forceWrite and forceLogging is truthy', (t) => {
-    logger.setNamespaces('*')
-    logger.setLevel('info')
+    const writeStub = sinon.stub(loggerMock, 'write')
 
-    const log = logger.createLogger('test', true)
-    const spy = sinon.spy(logger, 'write')
+    setNamespaces('*')
+    setLevel('info')
 
-    log.debug(null, {}, true)
+    const log = createLogger('test', true)
 
-    t.is(spy.callCount, 1)
+    log.debug('', {}, true)
 
-    logger.write.restore()
+    t.is(writeStub.callCount, 1)
+    writeStub.restore()
 })
 
 test('setLevel and setNamespace should not reset canForceWrite', (t) => {
-    const log = logger.createLogger('test', true)
-    logger.setNamespaces('*')
-    logger.setLevel('info')
-    const spy = sinon.spy(logger, 'write')
+    const writeStub = sinon.stub(loggerMock, 'write')
 
-    log.debug(null, {}, true)
+    const log = createLogger('test', true)
+    setNamespaces('*')
+    setLevel('info')
 
-    t.is(spy.callCount, 1)
+    log.debug('', {}, true)
 
-    logger.write.restore()
+    t.is(writeStub.callCount, 1)
+    writeStub.restore()
 })
 
 test("A logger instance shouldn't log if namespace is not enabled", (t) => {
-    logger.setNamespaces('test:*')
+    const writeStub = sinon.stub(loggerMock, 'write')
 
-    logger.setLevel('info')
+    setNamespaces('test:*')
 
-    const log = logger.createLogger('default')
-    const spy = sinon.spy(logger, 'write')
+    setLevel('info')
 
-    log.info(null, 'test')
+    const log = createLogger('default')
 
-    t.is(spy.callCount, 0)
+    log.info('', 'test')
 
-    logger.write.restore()
+    t.is(writeStub.callCount, 0)
+    writeStub.restore()
 })
 
 test("A logger instance shouldn't log if log level is lower than namespace pattern level", (t) => {
-    logger.setNamespaces('test:*=error')
+    const writeStub = sinon.stub(loggerMock, 'write')
 
-    logger.setLevel('info')
+    setNamespaces('test:*=error')
 
-    const log = logger.createLogger('test:subtest')
-    const spy = sinon.spy(logger, 'write')
+    setLevel('info')
 
-    log.info(null, 'test')
+    const log = createLogger('test:subtest')
 
-    t.is(spy.callCount, 0)
+    log.info('', 'test')
 
-    logger.write.restore()
+    t.is(writeStub.callCount, 0)
+    writeStub.restore()
 })
 
 test('A logger instance should log if log level is higher or equal than namespace pattern level', (t) => {
-    logger.setNamespaces('test:*=debug')
+    const writeStub = sinon.stub(loggerMock, 'write')
 
-    logger.setLevel('info')
+    setNamespaces('test:*=debug')
 
-    const log = logger.createLogger('test:subtest')
-    const spy = sinon.spy(logger, 'write')
+    setLevel('info')
 
-    log.debug(null)
-    t.true(spy.calledOnce)
+    const log = createLogger('test:subtest')
 
-    logger.write.restore()
+    log.debug('')
+    t.true(writeStub.calledOnce)
+    writeStub.restore()
 })
 
 test('A logger instance should log according to state defined in the latest matching namespace in the list', (t) => {
-    logger.setNamespaces('test:*=warn,test2:*,test:*=error,test2:*=none')
+    const writeStub = sinon.stub(loggerMock, 'write')
 
-    logger.setLevel('info')
+    setNamespaces('test:*=warn,test2:*,test:*=error,test2:*=none')
 
-    const log = logger.createLogger('test:subtest')
-    const log2 = logger.createLogger('test2:subtest')
-    const spy = sinon.spy(logger, 'write')
+    setLevel('info')
 
-    log.warn(null)
+    const log = createLogger('test:subtest')
+    const log2 = createLogger('test2:subtest')
+
+    log.warn('')
     log2.info('test')
-    t.is(spy.callCount, 1)
+    t.is(writeStub.callCount, 1)
 
-    logger.write.restore()
+    writeStub.restore()
 })
 
 test('A logger should call an output adapter with log data, metadata, message and data', (t) => {
-    logger.setNamespaces('test:*')
-    logger.setLevel('info')
-
-    const outputAdapter = sinon.spy()
-    logger.setOutput(outputAdapter)
-
     const now = new Date()
+    const timersStub = useFakeTimers(now.getTime())
 
-    const log = logger.createLogger('test:subTest')
-    const timersStub = sinon.useFakeTimers(now.getTime())
+    setNamespaces('test:*')
+    setLevel('info')
+
+    const outputAdapter = stub()
+    setOutput(outputAdapter)
+
+    const log = createLogger('test:subTest')
 
     log.warn('ctxId', 'test', { someData: 'someValue' })
 
@@ -186,17 +186,17 @@ test('A logger should call an output adapter with log data, metadata, message an
 })
 
 test('A logger should call all output output adapters added', (t) => {
-    logger.setNamespaces('test:*')
-    logger.setLevel('info')
-
-    const outputAdapter1 = sinon.spy()
-    const outputAdapter2 = sinon.spy()
-    logger.setOutput([outputAdapter1, outputAdapter2])
-
     const now = new Date()
+    const timersStub = useFakeTimers(now.getTime())
 
-    const log = logger.createLogger('test:subTest')
-    const timersStub = sinon.useFakeTimers(now.getTime())
+    setNamespaces('test:*')
+    setLevel('info')
+
+    const outputAdapter1 = stub()
+    const outputAdapter2 = stub()
+    setOutput([outputAdapter1, outputAdapter2])
+
+    const log = createLogger('test:subTest')
 
     log.warn('ctxId', 'test', { someData: 'someValue' })
 
@@ -224,29 +224,29 @@ test('A logger should call all output output adapters added', (t) => {
 })
 
 test("A logger shoudn't throw an error if not outputs defined", (t) => {
-    logger.setNamespaces('test:*')
-    logger.setLevel('info')
+    setNamespaces('test:*')
+    setLevel('info')
 
-    logger.setOutput()
+    setOutput()
 
-    const log = logger.createLogger('test:subTest')
+    const log = createLogger('test:subTest')
 
     log.warn('ctxId', 'test', { someData: 'someValue' })
     t.true(true)
 })
 
 test('A logger should support defining a global context', (t) => {
-    logger.setNamespaces('test:*')
-    logger.setLevel('info')
-    logger.setGlobalContext({ service: 'logger', mode: 'testing' })
-
-    const outputAdapter = sinon.spy()
-    logger.setOutput(outputAdapter)
-
     const now = new Date()
+    const timersStub = useFakeTimers(now.getTime())
 
-    const log = logger.createLogger('test:global:context')
-    const timersStub = sinon.useFakeTimers(now.getTime())
+    setNamespaces('test:*')
+    setLevel('info')
+    setGlobalContext({ service: 'logger', mode: 'testing' })
+
+    const outputAdapter = stub()
+    setOutput(outputAdapter)
+
+    const log = createLogger('test:global:context')
 
     log.warn('ctxId', 'test')
 
@@ -266,16 +266,16 @@ test('A logger should support defining a global context', (t) => {
 })
 
 test('A logger contextId arg should be an an optional argument', (t) => {
-    logger.setNamespaces('ns1:*')
-    logger.setLevel('info')
-
-    const outputAdapter = sinon.spy()
-    logger.setOutput(outputAdapter)
-
     const now = new Date()
+    const timersStub = useFakeTimers(now.getTime())
 
-    const log = logger.createLogger('ns1:subns1')
-    const timersStub = sinon.useFakeTimers(now.getTime())
+    setNamespaces('ns1:*')
+    setLevel('info')
+
+    const outputAdapter = stub()
+    setOutput(outputAdapter)
+
+    const log = createLogger('ns1:subns1')
 
     log.warn('msg1', { key1: 'value1' })
 
@@ -293,102 +293,103 @@ test('A logger contextId arg should be an an optional argument', (t) => {
 })
 
 test("A logger should not log if it's namespace is disabled after call to setNamespaces", (t) => {
-    logger.setNamespaces('*')
-    logger.setLevel('info')
+    const writeStub = sinon.stub(loggerMock, 'write')
 
-    const log = logger.createLogger('ns1')
-    const spy = sinon.spy(logger, 'write')
+    setNamespaces('*')
+    setLevel('info')
 
-    log.info(null, 'msg1')
-    logger.setNamespaces('ns2:*,ns3:*')
-    log.info(null, 'msg2')
+    const log = createLogger('ns1')
 
-    t.true(spy.calledOnce)
-    t.is(spy.args[0][0].message, 'msg1')
+    log.info('', 'msg1')
+    setNamespaces('ns2:*,ns3:*')
+    log.info('', 'msg2')
 
-    logger.write.restore()
+    t.true(writeStub.calledOnce)
+    t.is(writeStub.args[0][0].message, 'msg1')
+
+    writeStub.restore()
 })
 
 test('A logger should not log if log level is not upper after call to setLevel', (t) => {
-    logger.setNamespaces('*')
-    logger.setLevel('info')
+    const writeStub = sinon.stub(loggerMock, 'write')
 
-    const log = logger.createLogger('ns1')
-    const spy = sinon.spy(logger, 'write')
+    setNamespaces('*')
+    setLevel('info')
 
-    log.info(null, 'msg1')
-    logger.setLevel('warn')
-    log.info(null, 'msg2')
+    const log = createLogger('ns1')
 
-    t.true(spy.calledOnce)
-    t.is(spy.args[0][0].message, 'msg1')
+    log.info('', 'msg1')
+    setLevel('warn')
+    log.info('', 'msg2')
 
-    logger.write.restore()
+    t.true(writeStub.calledOnce)
+    t.is(writeStub.args[0][0].message, 'msg1')
+    writeStub.restore()
 })
 
 test('A logger should not log if upper namespace was enabled, but sub namespace level was set to none', (t) => {
-    logger.setNamespaces('ns1:*,ns1:subns1=none')
-    logger.setLevel('info')
+    const writeStub = sinon.stub(loggerMock, 'write')
 
-    const log = logger.createLogger('ns1:subns1')
-    const spy = sinon.spy(logger, 'write')
+    setNamespaces('ns1:*,ns1:subns1=none')
+    setLevel('info')
 
-    log.info(null, 'msg1')
+    const log = createLogger('ns1:subns1')
 
-    t.is(spy.callCount, 0)
+    log.info('', 'msg1')
 
-    logger.write.restore()
+    t.is(writeStub.callCount, 0)
+    writeStub.restore()
 })
 
 test('A logger should return true for a call to isLevelEnabled if level and namespace is enabled', (t) => {
-    logger.setNamespaces('ns1:*,ns1:subns1=none')
-    logger.setLevel('info')
+    setNamespaces('ns1:*,ns1:subns1=none')
+    setLevel('info')
 
-    const log = logger.createLogger('ns1:subns2')
+    const log = createLogger('ns1:subns2')
     t.true(log.isLevelEnabled('warn'))
 })
 
 test('A logger should return false for a call to isLevelEnabled if namespace level was set to none', (t) => {
-    logger.setNamespaces('ns1:*,ns1:subns1=none')
-    logger.setLevel('info')
+    setNamespaces('ns1:*,ns1:subns1=none')
+    setLevel('info')
 
-    const log = logger.createLogger('ns1:subns1')
+    const log = createLogger('ns1:subns1')
     t.false(log.isLevelEnabled('warn'))
 })
 
 test('A logger should return true for a call to isLevelEnabled if top namespace is enabled but another subnamespace is set to none', (t) => {
-    logger.setNamespaces('ns1:*,ns1:subns1=none')
-    logger.setLevel('error')
+    setNamespaces('ns1:*,ns1:subns1=none')
+    setLevel('error')
 
-    const log = logger.createLogger('ns1:subns2')
+    const log = createLogger('ns1:subns2')
     t.false(log.isLevelEnabled('warn'))
 })
 
 test('loggers should be equal if they are for the same namespace', (t) => {
-    logger.setNamespaces('ns1:*,ns1:subns1=none')
-    logger.setLevel('error')
+    setNamespaces('ns1:*,ns1:subns1=none')
+    setLevel('error')
 
-    const log1 = logger.createLogger('ns1:subns2')
-    const log2 = logger.createLogger('ns1:subns2')
+    const log1 = createLogger('ns1:subns2')
+    const log2 = createLogger('ns1:subns2')
     t.is(log1, log2)
 })
 
 test('parseNamespace should return a namespace if there is no level', (t) => {
-    const result = logger.parseNamespace('test:*')
+    const result = parseNamespace('test:*')
     t.deepEqual(result, { regex: /^test:.*?$/ })
 })
 
 test('parseNamespace should return a namespace and a level', (t) => {
-    const result = logger.parseNamespace('test:*=info')
+    const result = parseNamespace('test:*=info')
     t.deepEqual(result, { regex: /^test:.*?$/, level: 2 })
 })
 
 test('parseNamespace should return null if namespace is missing', (t) => {
-    const result = logger.parseNamespace('=info')
+    const result = parseNamespace('=info')
     t.deepEqual(result, null)
 })
 
 test('parseNamespace should return null if namespace is empty', (t) => {
-    const result = logger.parseNamespace('')
+    const result = parseNamespace('')
     t.deepEqual(result, null)
 })
