@@ -1,7 +1,7 @@
-import colors from 'colors/safe'
-import * as outputUtils from './output_utils'
-import { LogColor, Log, LogLevel, Output } from './definitions'
-const prettyOutput = require('prettyoutput')
+import * as prettyOutput from 'prettyoutput'
+import colors from 'colors'
+import * as outputUtils from './output_utils.js'
+import { LogColor, Log, LogLevel, Output } from './index.js'
 
 /**
  * Object mapping log color and log level
@@ -55,7 +55,7 @@ export const pretty = (log: Log): void => {
     const infos = `${time} (${log.namespace}) [${defaultLevel}] : `
     const output: Output = { contextId: log.contextId, meta: log.meta, data: log.data }
 
-    const result = `${infos}${colors[levelColor](log.message || '')}\n${prettyOutput(output, { maxDepth: 6 }, 2)}`
+    const result = `${infos}${colors[levelColor](log.message || '')}\n${prettyOutput.default(output, { maxDepth: 6 }, 2)}`
 
     process.stdout.write(result)
     process.stdout.write('\n')

@@ -1,0 +1,6 @@
+{
+  "reporter" : ["lcov", "cobertura", "text-summary"],
+  "extension": [".js", ".ts"],
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/@types/**"]
+}

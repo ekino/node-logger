@@ -3,9 +3,9 @@
  * Usage : JSON.stringify(element, getCircularReplacer())
  */
 
-export const getCircularReplacer = (): any => {
+export const getCircularReplacer = (): ((key: string | number, value: unknown) => unknown) => {
     const seen = new WeakSet()
-    return (key: string | number, value: any) => {
+    return (key: string | number, value: unknown) => {
         if (typeof value === 'object' && value !== null) {
             if (seen.has(value)) {
                 return
@@ -34,7 +34,7 @@ export const stringify = (log: Record<string, unknown>): string => {
  * Used to override error toJSON function to customize output
  * @return {object}
  */
-export const errorToJson = (obj: any): Record<string, unknown> => {
+export const errorToJson = (obj: Record<string, unknown>): Record<string, unknown> => {
     const result: Record<string, unknown> = {}
 
     Object.getOwnPropertyNames(obj).forEach(function (key) {

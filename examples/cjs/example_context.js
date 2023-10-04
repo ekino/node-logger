@@ -1,4 +1,4 @@
-const logger = require('../lib/index')
+const logger = require('../../lib/cjs/index.js')
 
 logger.setOutput(logger.outputs.pretty)
 logger.setNamespaces('*')
@@ -7,4 +7,4 @@ logger.setGlobalContext({ version: '2.0.0', env: 'dev' })
 
 const log = logger.createLogger('namespace')
 
-log.warn('message', { someData: 'someValue' })
+log.warn('example4', { someData: 'someValue' })
