@@ -1,7 +1,12 @@
-import colors from 'colors/safe'
-import * as outputUtils from './output_utils'
-import { LogColor, Log, LogLevel, Output } from './definitions'
-const prettyOutput = require('prettyoutput')
+import { Writable } from 'node:stream'
+import { inspect } from 'node:util'
+import { colors } from './colors.js'
+import type { Log, LogColor, LogLevel, Output } from './definitions.js'
+import { stringifyLog } from './output_utils.js'
+
+type PrettyOptions = {
+    maxDepth?: number
+}
 
 /**
  * Object mapping log color and log level
@@ -44,7 +49,7 @@ export const prettyTime = (time?: Date): string | undefined => {
 }
 
 /**
- * Log with pretty output formater in stdout
+ * Log with pretty output formatter in stdout
  * @param {Log} log
  */
 export const pretty = (log: Log): void => {
@@ -57,9 +62,15 @@ export const pretty = (log: Log): void => {
 
     const result = `${infos}${colors[levelColor](log.message || '')}\n${prettyOutput(output, { maxDepth: 6 }, 2)}`
 
-    process.stdout.write(result)
-    process.stdout.write('\n')
+    logStream.write(`${result}\n`)
 }
+
+export const prettyOutput = (o: unknown, options: PrettyOptions = {}, indent = 2): string =>
+    inspect(o, {
+        ...options,
+        depth: options.maxDepth ?? 6,
+        indent: ' '.repeat(indent),
+    } as Parameters<typeof inspect>[1])
 
 /**
  * Log in json to stdout
@@ -76,8 +87,13 @@ export const json = (log: Log): void => {
         data: log.data,
     })
 
-    const result = outputUtils.stringify(output)
+    const result = stringifyLog(output)
 
-    process.stdout.write(result)
-    process.stdout.write('\n')
+    logStream.write(`${result}\n`)
 }
+
+export const logStream = new Writable({
+    write(chunk, encoding, callback) {
+        process.stdout.write(chunk, encoding, callback)
+    },
+})

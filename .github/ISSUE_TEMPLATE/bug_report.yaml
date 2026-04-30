@@ -1,0 +1,55 @@
+name: Bug Report
+description: Report an issue with @ekino/logger
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        🐛 **Bug Report** - Please use this form for bugs only!
+
+  - type: input
+    validations:
+      required: true
+    attributes:
+      label: 🔎 Search Terms
+      description: |
+        List any terms you searched for in open/closed issues before reporting this bug.
+
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Problem Description
+      description: |
+        Describe the issue in detail. Include expected vs. actual behavior.
+
+  - type: input
+    validations:
+      required: true
+    attributes:
+      label: Version of @ekino/logger
+      placeholder: e.g., v3.0.0
+      description: |
+        You can find this by running `npm list @ekino/logger` or similar.
+
+  - type: input
+    validations:
+      required: true
+    attributes:
+      label: Node Version
+      placeholder: e.g., v22.8.0
+      description: |
+        Run `node -v` to find the version.
+
+  - type: textarea
+    attributes:
+      label: Steps to Reproduce
+      description: |
+        Describe how to reproduce the issue. If possible, provide a minimum working example.
+
+  - type: textarea
+    attributes:
+      label: Additional Info
+      description: |
+        Any additional context, error logs, or related info.

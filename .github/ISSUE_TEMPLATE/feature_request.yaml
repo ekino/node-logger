@@ -1,0 +1,37 @@
+name: Feature Request
+description: Suggest a new feature to enhance @ekino/logger
+title: "[Feature Request]: "
+labels: ["enhancement", "feature-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for wanting to make `@ekino/logger` better! 🎉 Please use this form to share a feature you'd love to see.
+
+  - type: input
+    validations:
+      required: true
+    attributes:
+      label: 🔎 Search Terms
+      description: |
+        To help us understand if this request already exists, list any terms you searched for in open/closed issues.
+  
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Feature Description
+      description: |
+        Provide a clear description of the feature. What would this feature do, and how would it enhance the library?
+
+  - type: textarea
+    attributes:
+      label: Use Cases
+      description: |
+        Describe a few use cases where this feature would make a difference.
+
+  - type: textarea
+    attributes:
+      label: Additional Info
+      description: |
+        Share any additional context or examples to help us understand your request.

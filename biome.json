@@ -1,0 +1,58 @@
+{
+    "$schema": "https://biomejs.dev/schemas/2.4.13/schema.json",
+    "assist": { "actions": { "source": { "organizeImports": "on" } } },
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "recommended": true,
+            "style": {
+                "useImportType": "off"
+            }
+        }
+    },
+    "formatter": {
+        "enabled": true,
+        "indentStyle": "space",
+        "indentWidth": 4,
+        "lineWidth": 100,
+        "formatWithErrors": true,
+        "includes": ["**"],
+        "attributePosition": "auto"
+    },
+    "javascript": {
+        "formatter": {
+            "semicolons": "asNeeded",
+            "bracketSpacing": true,
+            "quoteStyle": "single",
+            "trailingCommas": "es5",
+            "indentStyle": "space",
+            "indentWidth": 4,
+            "lineWidth": 100,
+            "arrowParentheses": "always",
+            "bracketSameLine": false
+        }
+    },
+    "files": {
+        "includes": [
+            "**",
+            "!**/.DS_Store",
+            "!**/.git",
+            "!**/.githooks",
+            "!**/.github",
+            "!**/.idea",
+            "!**/.nyc_output",
+            "!**/.pnpm-store",
+            "!**/.vscode",
+            "!**/.yarn",
+            "!**/build",
+            "!**/coverage",
+            "!**/dist",
+            "!**/docs",
+            "!**/lib",
+            "!**/node_modules",
+            "!**/out",
+            "!**/package.json",
+            "!**/pnpm-store"
+        ]
+    }
+}

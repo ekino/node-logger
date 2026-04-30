@@ -4,15 +4,15 @@
     "homepage": "https://github.com/ekino/node-logger",
     "license": "MIT",
     "version": "2.1.1",
-    "main": "lib/index.js",
-    "types": "lib/index.d.ts",
-    "files": [
-        "/lib"
-    ],
     "tags": [
         "logger",
         "lightweight",
-        "namespaces"
+        "namespaces",
+        "debug",
+        "multioutput",
+        "logging",
+        "javascript",
+        "typescript"
     ],
     "repository": {
         "type": "git",
@@ -23,61 +23,47 @@
             "name": "Ekino"
         }
     ],
-    "engines": {
-        "node": ">=14"
+    "type": "module",
+    "main": "lib/esm/index.js",
+    "types": "lib/esm/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./lib/esm/index.d.ts",
+                "default": "./lib/esm/index.js"
+            },
+            "require": {
+                "types": "./lib/cjs/index.d.ts",
+                "default": "./lib/cjs/index.js"
+            }
+        }
     },
-    "dependencies": {
-        "colors": "1.x",
-        "prettyoutput": "1.x",
-        "uuid": "8.x"
-    },
+    "files": [
+        "/lib"
+    ],
     "devDependencies": {
-        "@commitlint/config-conventional": "17.x",
-        "@types/node": "18.x",
-        "@types/uuid": "8.x",
-        "ava": "4.x",
-        "commitlint": "17.x",
-        "conventional-changelog": "3.x",
-        "conventional-changelog-cli": "2.x",
-        "coveralls": "3.x",
-        "eslint": "8.x",
-        "husky": "8.x",
-        "nyc": "15.x",
-        "prettier": "2.x",
-        "sinon": "14.x",
-        "ts-node": "10.x",
-        "typescript": "4.x"
+        "@biomejs/biome": "2.4.13",
+        "@types/node": "24.12.2",
+        "@vitest/coverage-v8": "4.1.5",
+        "commitlint": "20.5.2",
+        "tsx": "4.19.0",
+        "typescript": "6.0.3",
+        "vitest": "4.1.5"
     },
     "scripts": {
-        "fmt": "prettier --color --write \"{*,test/**/*}.{js,ts}\" --cache",
-        "check-fmt": "prettier --list-different \"{*,test/**/*}.{js,ts}\"",
-        "build": "tsc --build tsconfig.lib.json",
-        "prepublishOnly": "rm -rf lib && yarn build",
-        "test": "ava",
-        "test-cover": "nyc ava",
-        "coverage": "nyc ava | coveralls",
+        "lint": "biome check --write",
+        "check": "biome check",
+        "build": "pnpm run build:esm && pnpm run build:cjs",
+        "build:esm": "tsc -p tsconfig.lib.json --outDir lib/esm",
+        "build:cjs": "tsc -p tsconfig.lib.json --module CommonJS --moduleResolution Bundler --outDir lib/cjs",
+        "postbuild:cjs": "echo '{\"type\": \"commonjs\"}' > lib/cjs/package.json",
+        "prepublishOnly": "pnpm run build",
+        "test": "vitest --run test/*.test.ts",
+        "coverage": "vitest run --coverage",
         "version": "echo ${npm_package_version}",
-        "lint": "eslint ."
-    },
-    "eslintIgnore": [
-        "lib",
-        "examples"
-    ],
-    "ava": {
-        "files": [
-            "test/**/*.js"
-        ],
-        "extensions": [
-            "js"
-        ],
-        "require": [
-            "ts-node/register"
-        ]
-    },
-    "nyc": {
-        "reporter": [
-            "lcov",
-            "text-lcov"
-        ]
+        "examples": "./examples/exec.sh",
+        "examples-esm": "./examples/esm/exec.sh",
+        "examples-cjs": "./examples/cjs/exec.sh",
+        "hook": "git config core.hooksPath ./.githooks || true"
     }
 }

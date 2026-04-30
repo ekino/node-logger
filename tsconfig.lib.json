@@ -2,8 +2,7 @@
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "declaration": true,
-        "outDir": "lib",
-        "sourceMap": true
+        "rootDir": "./src"
     },
     "include": ["src/**/*.ts"]
 }

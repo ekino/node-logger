@@ -1,130 +1,107 @@
 # @ekino/logger
 
+A lightweight, flexible logger that merges debug-style namespace management, Winston-inspired log levels, and customizable multi-output functionality.
+
 [![NPM version][npm-image]][npm-url]
-[![Travis CI][travis-image]][travis-url]
 [![Coverage Status][coverage-image]][coverage-url]
-[![styled with prettier][prettier-image]][prettier-url]
 
-A Lightweight logger that combines debug namespacing capabilities with winston levels and multioutput
+## Table of Contents
 
--   [Installation](#installation)
--   [Usage](#usage)
-    -   [Using context ID](#using-context-id)
-    -   [Using namespaces](#using-namespaces)
-        -   [Using Logging Namespaces](#using-logging-namespaces)
-    -   [Outputs](#outputs)
-        -   [JSON](#json)
-        -   [Pretty](#pretty)
-        -   [Output function](#output-function)
-        -   [JSON Stringify utility](#json-stringify-utility)
-    -   [Log data](#log-data)
-        -   [Adding global metadata](#adding-global-metadata)
--   [TypeScript](#typescript)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+    - [Basic logging](#basic-logging)
+    - [Context ID](#context-id)
+    - [Namespaces and levels](#namespaces-and-levels)
+    - [Output formats](#output-formats)
+        - [JSON format](#json-format)
+        - [Pretty format](#pretty-format)
+        - [Custom output functions](#custom-output-functions)
+    - [Log data and metadata](#log-data-and-metadata)
+        - [Adding global metadata](#adding-global-metadata)
+    - [Force logging](#force-logging)
+- [Contributing](#contributing)
+
+## Features
+
+- Set log levels globally or per namespace for detailed control.
+- Supports JSON, Pretty-print, and custom output adapters.
+- Optionally track logs across function calls by assigning a unique context ID.
+- Fully written in TypeScript for improved safety and ease of use.
+- Supports both ESM and CommonJS imports.
+- Works with Node.js, Deno, and Bun environments.
 
 ## Installation
 
-Using npm:
+Install via npm, yarn or pnpm:
 
 ```sh
-npm install @ekino/logger
-```
-
-Or yarn:
-
-```sh
+npm  add @ekino/logger
 yarn add @ekino/logger
+pnpm add @ekino/logger
 ```
+
+### Git hooks
+
+This package configures local Git hooks for the repository by setting:
+
+`core.hooksPath = ./.githooks`
+
+This is done automatically during installation to ensure Git hooks are consistently enabled for contributors.
 
 ## Usage
 
-By default, the logger output warn and error levels for all namespaces.
-You can set LOG_LEVEL environment to override the default behavior.
-By default, it writes logs to stdout in JSON format
+By default, `@ekino/logger` outputs `warn` and `error` levels for all namespaces, with logs written to stdout in JSON format.
 
-The logger api allows you to set log level for all namespaces. For advanced usage, you define it even per namespace.
+Adjust the log level globally or per namespace using the `LOG_LEVEL` environment variable or programmatically with `setLevel` and `setNamespaces`.
 
-A log instance is bounded to a namespace. To use it, instantiate a logger with a namespace and call a log function.
+### Basic logging
 
-This logger define 5 log levels: error, warn, info, debug, trace.
-When you set a level, all levels above it are enabled too.
-Log level can be set by calling `setLevel` function.
+`@ekino/logger` provides five log levels: `trace`, `debug`, `info`, `warn`, and `error`. Setting a specific level enables it and all higher-priority levels.
 
-For example, enabling `info` will enable `info`, `warn` and `error` but not `debug` or `trace`.
-The "special" log level `none` means no log and can only be used to set a namespace level.
+By default, setting info will enable `info`, `warn`, and `error`, but not debug or trace. The log levels are defined as:
+
+Log level priorities:
 
 ```js
 { trace: 0, debug: 1, info: 2, warn: 3, error: 4 }
 ```
 
-The basic log function signature is:
+Example:
 
 ```js
-my_log.the_level(message, data) // With data an object holding informations usefull for debug purpose
-```
-
-Example
-
-```js
-const { setNamespaces, setLevel, createLogger } = require('@ekino/logger')
+import { setNamespaces, setLevel, createLogger } from '@ekino/logger'
 
 setNamespaces('root:*')
 setLevel('debug')
 
 const logger = createLogger('root:testing')
-logger.debug('sample message', {
-    foo: 'bar',
-})
+logger.debug('Sample debug message', { foo: 'bar' })
 ```
 
-output:
+Output example:
 
-![Example](docs/images/example_usage1.gif)
+![Example](docs/images/example1.png)
 
-### Using context ID
+### Context ID
 
-One of the main complexity working with node is ability to follow all logs attached to one call or one function.
-This is not mandatory, but based on our experience, we recommend as a best practice to add a unique identifier that will be passed all along functions calls.
-When you log something, you can provide this id as a first parameter and logger will log it. If not provided, it's auto generated.
-
-The signature of the function with contextId is:
+For traceability, the logger supports a `contextId`, helping to link logs across calls. You can either provide a custom `contextId` or let the logger auto-generate one.
 
 ```js
-my_log.the_level(contextId, message, data)
+const logger = createLogger('app:example')
+logger.debug('ctxId', 'Log with predefined context ID', { foo: 'bar' })
+// Or logger.debug('Log with predefined context ID', { foo: 'bar' })
 ```
 
-Example app.js
+Output example:
 
-```javascript
-const { setNamespaces, setLevel, createLogger } = require('@ekino/logger')
+![Example](docs/images/example2.png)
 
-setNamespaces('root:*')
-setLevel('debug')
+### Namespaces and levels
 
-const logger = createLogger('root:testing')
-logger.debug('ctxId', 'log with predefined context ID', {
-    foo: 'bar',
-})
-```
+Namespaces offer flexibility for selectively enabling logs. Set a default global log level and configure specific namespaces with unique levels, including `none` to disable.
 
-output:
-
-![Example](docs/images/example_usage2.gif)
-
-### Using namespaces
-
-Logger relies on namespaces. When you want to log something, you should define a namespace that is bound to it.
-When you debug, this gives you the flexibility to enable only the namespaces you need to output.
-As a good practice, we recommend setting a namespace by folder / file.
-For example for a file in modules/login/dao you could define 'modules:login:dao'.
-Warning, "=" can't be part of the namespace as it's a reserved symbol.
-
-You can also define a level per namespace. If no level is defined, the default global level is used.
-To disable logs of a namespace, you can specify a level `none`
-A namespace ':\*' means eveything after ':' will be enabled. Namespaces are parsed as regexp.
-
-To define namespace level, you should suffix namespace with "=the_level"
-For example let's say you need to enable all info logs but for debug purpose you need to lower the level
-of the namespace database to `debug`. You could then use:
+To configure namespaces:
 
 ```js
 const { setLevel, setNamespaces } = require('@ekino/logger')
@@ -133,202 +110,102 @@ setLevel('info')
 setNamespaces('*,database*=debug,database:redis*=none')
 ```
 
-#### Using Logging Namespaces
+Example of using namespace-specific logging:
 
 ```js
-const { setNamespaces, setLevel, createLogger } = require('@ekino/logger')
-
-setNamespaces('namespace:*, namespace:mute=none')
-setLevel('debug')
-
 const loggerA = createLogger('namespace:subNamespace')
 const loggerB = createLogger('namespace:mute')
 
-loggerA.debug('Will be logged')
-loggerB.info('Will not be logged')
+loggerA.debug('This will be logged')
+loggerB.info('This will not be logged')
 ```
 
-```js
-const { setNamespaces, setLevel, createLogger } = require('@ekino/logger')
+### Output formats
 
-setNamespaces('*, wrongNamespace=none')
-setLevel('debug')
+@ekino/logger supports multiple output formats with default JSON logging to `stdout`. You can enable `pretty` output or create custom adapters.
 
-const loggerA = createLogger('namespace:subNamespace')
-const loggerB = createLogger('wrongNamespace')
+#### JSON format
 
-loggerA.debug('Will be logged')
-loggerB.info('Will not be logged')
-```
-
-### Outputs
-
-Logger allow you to provide your own output adapter to customize how and where to write logs.
-It's bundle by default with `pretty` adapter and `json` that both write to stdout.
-By default, json adapter is enabled.
-You can use multiple adapters at the same time
-
-#### JSON
+The JSON output adapter logs structured data, ideal for integration with log collectors.
 
 ```js
-const { setNamespaces, setLevel, setOutput, outputs, createLogger } = require('@ekino/logger')
-
-setNamespaces('namespace:*')
-setLevel('debug')
 setOutput(outputs.json)
-
 const logger = createLogger('namespace:subNamespace')
-logger.debug('ctxId', 'Will be logged', {
-    someData: 'someValue',
-    someData2: 'someValue',
-})
+logger.debug('ctxId', 'Log message', { someData: 'value' })
 ```
 
-output:
+Output example:
 
-![Example](docs/images/example_usage3.gif)
+![Example](docs/images/example3.png)
 
-#### Pretty
+#### Pretty format
 
-Pretty will output a yaml like content.
+The Pretty format outputs logs in a YAML-like style for enhanced readability in local development.
 
 ```js
-const { setNamespaces, setLevel, setOutput, outputs, createLogger } = require('@ekino/logger')
-
-setNamespaces('namespace:*')
-setLevel('debug')
 setOutput(outputs.pretty)
-
 const logger = createLogger('namespace:subNamespace')
-logger.debug('ctxId', 'Will be logged', {
-    someData: 'someValue',
-    someData2: 'someValue',
-})
+logger.debug('ctxId', 'Log message', { someData: 'value' })
 ```
 
-output:
+Output example:
 
-![Example](docs/images/example_pretty.gif)
+![Example](docs/images/example_pretty.png)
 
-#### Output function
+#### Custom output functions
 
-An output, is a function that will receive log data and should transform and store it
-
-Log data follow the format:
-
-```
-{
-    time: Date,
-    level: string,
-    namespace: string,
-    contextId: string,
-    meta: { any data defined in global context },
-    message: string,
-    data: object
-}
-```
+Custom output functions allow flexible handling of log data. Pass an array of adapters for multiple outputs.
 
 ```js
-const { setNamespaces, setLevel, setOutput, outputs, outputUtils, createLogger } = require('@ekino/logger')
-
-setNamespaces('namespace:*')
-setLevel('debug')
-
 const consoleAdapter = (log) => {
     console.log(outputUtils.stringify(log))
 }
 
-// This will output in stdout with the pretty output
-// and in the same will log through native console.log() function (usually to stdout too)
 setOutput([outputs.pretty, consoleAdapter])
-
 const logger = createLogger('namespace:subNamespace')
-logger.debug('ctxId', 'Will be logged', {
-    someData: 'someValue',
-    someData2: 'someValue',
-})
+logger.debug('ctxId', 'Log message', { someData: 'value' })
 ```
 
-#### JSON Stringify utility
+### Log data and metadata
 
-To ease the creation of an output adapter, we provide a utility to stringify a json object that support circular reference
-and add stack to output for errors.
-
-```js
-const { outputUtils } = require('@ekino/logger')
-
-const consoleAdapter = (log) => {
-    console.log(outputUtils.stringify(log))
-}
-```
-
-### Log data
-
-Most of the time, a log message is not enough to guess context.
-You can append arbitrary data to your logs.
-If you're using some kind of log collector, you'll then be able to extract those values and inject them in elasticsearch for example.
+Adding metadata to logs enhances context and helps filter data in log collectors. Add custom data directly or globally to each log instance.
 
 ```js
-const { setOutput, setNamespaces, setLevel, createLogger } = require('@ekino/logger')
-
-setOutput('pretty')
-setNamespaces('namespace:*')
-setLevel('info')
-
 const logger = createLogger('namespace:subNamespace')
-logger.warn('message', { someData: 'someValue' })
+logger.warn('Log message', { additionalData: 'value' })
 ```
 
-output:
+Output example:
 
-![Example](docs/images/example_data.gif)
-
-### Force Log
-
-You can force to write the log even the logLevel isn't enabled.
-
-```js
-const { setOutput, setNamespaces, setLevel, createLogger } = require('@ekino/logger')
-
-setOutput('pretty')
-setNamespaces('namespace:*')
-setLevel('info')
-
-const log = logger.createLogger('namespace', true)
-const num = 1
-log.debug('Will be logged', { someData: 'someValue' }, num > 0)
-```
+![Example](docs/images/example_data.png)
 
 #### Adding global metadata
 
-Sometimes, you need to identify to which version or which application the logs refers to.
-To do so, we provide a function to set informations that will be added to the each log at a top level key.
+Use `setGlobalContext` to add metadata, such as app version or environment, to all log entries.
 
 ```js
-const { setOutput, setNamespaces, setLevel, setGlobalContext, createLogger } = require('@ekino/logger')
-
-setOutput('pretty')
-setNamespaces('*')
-setLevel('info')
 setGlobalContext({ version: '2.0.0', env: 'dev' })
-
 const logger = createLogger('namespace')
-logger.warn('message', { someData: 'someValue' })
+logger.warn('Log message', { additionalData: 'value' })
 ```
 
-output:
+Output example:
 
-![Example](docs/images/example_context.gif)
+![Example](docs/images/example_context.png)
 
-## TypeScript
+### Force logging
 
-This package provides its own definition, so it can be easily used with TypeScript.
+Override the log level for critical messages by forcing them to be logged:
+
+```js
+logger.debug('Will be logged regardless of level', { forceLogging: true })
+```
+
+## Contributing
+
+Contributions are welcome! Please refer to our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on submitting issues, improvements, and more.
 
 [npm-image]: https://img.shields.io/npm/v/@ekino/logger.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/@ekino/logger
-[travis-image]: https://img.shields.io/travis/ekino/node-logger.svg?style=flat-square
-[travis-url]: https://travis-ci.org/ekino/node-logger
-[prettier-image]: https://img.shields.io/badge/styled_with-prettier-ff69b4.svg?style=flat-square
-[prettier-url]: https://github.com/prettier/prettier
 [coverage-image]: https://img.shields.io/coveralls/ekino/node-logger/master.svg?style=flat-square
 [coverage-url]: https://coveralls.io/github/ekino/node-logger?branch=master
