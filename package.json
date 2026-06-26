@@ -3,7 +3,7 @@
     "description": "A Lightweight logger that combines debug namespacing capabilities with winston levels and multioutput",
     "homepage": "https://github.com/ekino/node-logger",
     "license": "MIT",
-    "version": "2.1.1",
+    "version": "3.0.0",
     "tags": [
         "logger",
         "lightweight",
